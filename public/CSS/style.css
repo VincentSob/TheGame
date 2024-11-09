@@ -1,0 +1,207 @@
+
+/* http://meyerweb.com/eric/tools/css/reset/ 
+  v2.0 | 20110126
+  License: none (public domain)
+
+RRRRRRRRRRRRRRRRR                                                                     tttt                       CCCCCCCCCCCCC   SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS 
+R::::::::::::::::R                                                                 ttt:::t                    CCC::::::::::::C SS:::::::::::::::S SS:::::::::::::::S
+R::::::RRRRRR:::::R                                                                t:::::t                  CC:::::::::::::::CS:::::SSSSSS::::::SS:::::SSSSSS::::::S
+RR:::::R     R:::::R                                                               t:::::t                 C:::::CCCCCCCC::::CS:::::S     SSSSSSSS:::::S     SSSSSSS
+  R::::R     R:::::R    eeeeeeeeeeee        ssssssssss       eeeeeeeeeeee    ttttttt:::::ttttttt          C:::::C       CCCCCCS:::::S            S:::::S            
+  R::::R     R:::::R  ee::::::::::::ee    ss::::::::::s    ee::::::::::::ee  t:::::::::::::::::t         C:::::C              S:::::S            S:::::S            
+  R::::RRRRRR:::::R  e::::::eeeee:::::eess:::::::::::::s  e::::::eeeee:::::eet:::::::::::::::::t         C:::::C               S::::SSSS          S::::SSSS         
+  R:::::::::::::RR  e::::::e     e:::::es::::::ssss:::::se::::::e     e:::::etttttt:::::::tttttt         C:::::C                SS::::::SSSSS      SS::::::SSSSS    
+  R::::RRRRRR:::::R e:::::::eeeee::::::e s:::::s  ssssss e:::::::eeeee::::::e      t:::::t               C:::::C                  SSS::::::::SS      SSS::::::::SS  
+  R::::R     R:::::Re:::::::::::::::::e    s::::::s      e:::::::::::::::::e       t:::::t               C:::::C                     SSSSSS::::S        SSSSSS::::S 
+  R::::R     R:::::Re::::::eeeeeeeeeee        s::::::s   e::::::eeeeeeeeeee        t:::::t               C:::::C                          S:::::S            S:::::S
+  R::::R     R:::::Re:::::::e           ssssss   s:::::s e:::::::e                 t:::::t    tttttt      C:::::C       CCCCCC            S:::::S            S:::::S
+RR:::::R     R:::::Re::::::::e          s:::::ssss::::::se::::::::e                t::::::tttt:::::t       C:::::CCCCCCCC::::CSSSSSSS     S:::::SSSSSSSS     S:::::S
+R::::::R     R:::::R e::::::::eeeeeeee  s::::::::::::::s  e::::::::eeeeeeee        tt::::::::::::::t        CC:::::::::::::::CS::::::SSSSSS:::::SS::::::SSSSSS:::::S
+R::::::R     R:::::R  ee:::::::::::::e   s:::::::::::ss    ee:::::::::::::e          tt:::::::::::tt          CCC::::::::::::CS:::::::::::::::SS S:::::::::::::::SS 
+RRRRRRRR     RRRRRRR    eeeeeeeeeeeeee    sssssssssss        eeeeeeeeeeeeee            ttttttttttt               CCCCCCCCCCCCC SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS   
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/**                                                                                                                              
+
+MMMMMMMM               MMMMMMMM                                                CCCCCCCCCCCCC   SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS 
+M:::::::M             M:::::::M                                             CCC::::::::::::C SS:::::::::::::::S SS:::::::::::::::S
+M::::::::M           M::::::::M                                           CC:::::::::::::::CS:::::SSSSSS::::::SS:::::SSSSSS::::::S
+M:::::::::M         M:::::::::M                                          C:::::CCCCCCCC::::CS:::::S     SSSSSSSS:::::S     SSSSSSS
+M::::::::::M       M::::::::::M   ooooooooooo   nnnn  nnnnnnnn          C:::::C       CCCCCCS:::::S            S:::::S            
+M:::::::::::M     M:::::::::::M oo:::::::::::oo n:::nn::::::::nn       C:::::C              S:::::S            S:::::S            
+M:::::::M::::M   M::::M:::::::Mo:::::::::::::::on::::::::::::::nn      C:::::C               S::::SSSS          S::::SSSS         
+M::::::M M::::M M::::M M::::::Mo:::::ooooo:::::onn:::::::::::::::n     C:::::C                SS::::::SSSSS      SS::::::SSSSS    
+M::::::M  M::::M::::M  M::::::Mo::::o     o::::o  n:::::nnnn:::::n     C:::::C                  SSS::::::::SS      SSS::::::::SS  
+M::::::M   M:::::::M   M::::::Mo::::o     o::::o  n::::n    n::::n     C:::::C                     SSSSSS::::S        SSSSSS::::S 
+M::::::M    M:::::M    M::::::Mo::::o     o::::o  n::::n    n::::n     C:::::C                          S:::::S            S:::::S
+M::::::M     MMMMM     M::::::Mo::::o     o::::o  n::::n    n::::n      C:::::C       CCCCCC            S:::::S            S:::::S
+M::::::M               M::::::Mo:::::ooooo:::::o  n::::n    n::::n       C:::::CCCCCCCC::::CSSSSSSS     S:::::SSSSSSSS     S:::::S
+M::::::M               M::::::Mo:::::::::::::::o  n::::n    n::::n        CC:::::::::::::::CS::::::SSSSSS:::::SS::::::SSSSSS:::::S
+M::::::M               M::::::M oo:::::::::::oo   n::::n    n::::n          CCC::::::::::::CS:::::::::::::::SS S:::::::::::::::SS 
+MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             CCCCCCCCCCCCC SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS   
+*/
+html{
+  background-color: gray;
+}
+
+.board .card {
+  background-color: transparent;
+  width: 220px;
+  height: 300px;
+  border: 1px solid #eeeeee;
+  perspective: 1000px;
+}
+
+.card {
+  font-size: 150%;
+  background-color: transparent;
+  width: 190px;
+  height: 259px;
+  border: 1px solid #eeeeee;
+  perspective: 1000px;
+  margin-bottom: 1%;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+
+.card:hover .card-inner {
+  /*transform: rotateY(180deg);*/
+}
+
+.card-front,.card-front-ascendant, .card-front-descendant, 
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card-front {
+  color: white;
+  background: radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%);
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  background-image: url(./skull.png), radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.card-back h2{
+  margin: 15% auto;
+  font-size: 200%;
+  font-weight: bold;
+}
+
+.card-front h2{
+  margin: 50% auto;
+  font-size: 200%;
+  font-weight: bold;
+}
+
+.card-front-ascendant h2{
+  margin: 80% auto;
+  font-size: 200%;
+  font-weight: bold;
+}
+
+.card-front-descendant h2{
+  margin: 30% auto;
+  font-size: 200%;
+  font-weight: bold;
+}
+
+.card-front-ascendant {
+  color: white;
+  background: no-repeat;
+  background-image: url(./fleche-vers-le-bas.png) , radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
+  background-size: contain;
+  background-position: center;
+}
+
+.card-front-descendant {
+  color: white;
+  background: no-repeat;
+  background-image: url(./fleches-vers-le-haut.png) , radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
+  background-size: contain;
+  background-position: center;
+}
+
+.board .indicationCard, .board .playingCard{
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+
+}
+
+footer{
+  position: absolute;
+  bottom: 0;
+  margin: 0 10%;
+  display: flex;
+}
+
+
+footer .card:hover{
+  transform: translateY(-10%);
+}
+
+#btnShowOff{
+  color: white;
+  border-radius: 2%;
+  background-image: radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
+  
+}
+

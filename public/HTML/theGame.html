@@ -1,12 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html class="lightMode" lang="fr">
   <head>
     <title>The Game</title>
-    <link rel="stylesheet" type="text/css" href="../css/card.css">
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="../js/theGamePlayer.js"></script>
+    <link rel="stylesheet" type="text/css" href="../CSS/style.css">
+    <script src="../JS/theGamePlayer.js"></script>
   </head>
   <body>
+  <h1>THE GAME</h1>
+
+  <div>
+    <h2>Créer une Partie</h2>
+    <input id="nomJoueurCreer" placeholder="Votre nom">
+    <input id="nombreJoueurs" type="number" min="1" max="5" placeholder="Nombre de joueurs (1-5)">
+    <button onclick="creerPartie()">Créer Partie</button>
+  </div>
+
+  <div>
+    <h2>Rejoindre une Partie</h2>
+    <input id="idPartie" placeholder="ID de la Partie">
+    <input id="nomJoueurRejoindre" placeholder="Votre nom">
+    <button onclick="rejoindrePartie()">Rejoindre Partie</button>
+  </div>
+
+  <div id="messages"></div>
     <div class="board">
     
       <div class="indicationCard">
@@ -52,6 +68,7 @@
               </div>
             </div>
           </div>
+        <button type="button" id="btnShowOff">∇</button>
         </div>
 
 
@@ -169,5 +186,4 @@
     </div>
 
   </footer>
-  <button type="button" id="btnShowOff">∇</button>
 </html>

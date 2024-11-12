@@ -1,24 +1,27 @@
+
+// index.js
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path'); // Pour gérer les chemins des fichiers
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Servir les fichiers statiques (CSS, JS, etc.)
-app.use(express.static(path.join(__dirname, 'public'))); // Assurez-vous que vos fichiers sont dans le dossier 'public'
-
-// Route principale pour servir la page HTML
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/HTML/theGame.html')); // Chemin vers votre fichier HTML
-});
-
 // Stockage des parties
 const parties = {};
 
+// Servir les fichiers statiques (CSS, JS, etc.)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Route principale pour servir la page HTML
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'theGame.html')); // Chemin vers votre fichier HTML
+});
+
 // Gestion des connexions Socket.io
+/*
 io.on('connection', (socket) => {
     console.log('Un joueur s\'est connecté :', socket.id);
 
@@ -88,9 +91,40 @@ io.on('connection', (socket) => {
             }
         }
     });
+});*/
+
+// Gestion des erreurs du serveur HTTP
+server.on('error', (err) => {
+    console.error('Erreur serveur :', err);
 });
 
 // Serveur écoute sur le port 8080
 server.listen(8080, () => {
     console.log('Serveur démarré sur http://localhost:8080');
+});
+
+function darkModeUpdate(){
+    let html = document.querySelector('HTML');
+    console.log(html);
+    html.classList.toggle("darkMode");
+    html.classList.toggle("lightMode");
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    document.getElementById("btnShowOff").addEventListener("click", function() {
+        const footer = document.querySelector('footer');
+        if (footer.style.display === 'none'){
+            footer.style.display='';
+        }else{
+            footer.style.display = 'none';
+        }
+    });
+
+    document.addEventListener("keydown", function(event) {
+        if (event.code === 'KeyD'){
+            darkModeUpdate();
+        }
+        console.log(`Touche appuyée : ${event.key} (ou ${event.code})`);
+    });
 });

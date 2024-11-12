@@ -84,124 +84,279 @@ M::::::M               M::::::Mo:::::::::::::::o  n::::n    n::::n        CC::::
 M::::::M               M::::::M oo:::::::::::oo   n::::n    n::::n          CCC::::::::::::CS:::::::::::::::SS S:::::::::::::::SS 
 MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             CCCCCCCCCCCCC SSSSSSSSSSSSSSS    SSSSSSSSSSSSSSS   
 */
-html{
-  background-color: gray;
+
+.lightMode{
+  --main-color: white;
+  --font-color: black;
+  --background-color: white;
+  --border-color: #005708;
+  --border-card-color: green;
+  --between-card-color: #42ad42;
+  --center-card-color: #68c751;
+  --background-card-color: radial-gradient(circle, var(--center-card-color) 6%, var(--between-card-color) 53%, var(--border-card-color) 92%)  ;
 }
 
-.board .card {
-  background-color: transparent;
-  width: 220px;
-  height: 300px;
-  border: 1px solid #eeeeee;
-  perspective: 1000px;
+.darkMode{
+  --main-color: black;
+  --font-color: white;
+  --background-color: #002c00;
+  --border-color: #004207;
+  --border-card-color: #075407;
+  --between-card-color: #116b11;
+  --center-card-color: #2e6921;
+  --background-card-color: radial-gradient(circle, var(--center-card-color) 6%, var(--between-card-color) 53%, var(--border-card-color) 92%)  ;
 }
 
-.card {
-  font-size: 150%;
-  background-color: transparent;
-  width: 190px;
-  height: 259px;
-  border: 1px solid #eeeeee;
-  perspective: 1000px;
-  margin-bottom: 1%;
+/**
+  1111111    222222222222222         000000000          000000000
+ 1::::::1   2:::::::::::::::22     00:::::::::00      00:::::::::00
+1:::::::1   2::::::222222:::::2  00:::::::::::::00  00:::::::::::::00
+111:::::1   2222222     2:::::2 0:::::::000:::::::00:::::::000:::::::0
+   1::::1               2:::::2 0::::::0   0::::::00::::::0   0::::::0ppppp   ppppppppp   xxxxxxx      xxxxxxx
+   1::::1               2:::::2 0:::::0     0:::::00:::::0     0:::::0p::::ppp:::::::::p   x:::::x    x:::::x
+   1::::1            2222::::2  0:::::0     0:::::00:::::0     0:::::0p:::::::::::::::::p   x:::::x  x:::::x
+   1::::l       22222::::::22   0:::::0 000 0:::::00:::::0 000 0:::::0pp::::::ppppp::::::p   x:::::xx:::::x
+   1::::l     22::::::::222     0:::::0 000 0:::::00:::::0 000 0:::::0 p:::::p     p:::::p    x::::::::::x
+   1::::l    2:::::22222        0:::::0     0:::::00:::::0     0:::::0 p:::::p     p:::::p     x::::::::x
+   1::::l   2:::::2             0:::::0     0:::::00:::::0     0:::::0 p:::::p     p:::::p     x::::::::x
+   1::::l   2:::::2             0::::::0   0::::::00::::::0   0::::::0 p:::::p    p::::::p    x::::::::::x
+111::::::1112:::::2       2222220:::::::000:::::::00:::::::000:::::::0 p:::::ppppp:::::::p   x:::::xx:::::x
+1::::::::::12::::::2222222:::::2 00:::::::::::::00  00:::::::::::::00  p::::::::::::::::p   x:::::x  x:::::x
+1::::::::::12::::::::::::::::::2   00:::::::::00      00:::::::::00    p::::::::::::::pp   x:::::x    x:::::x
+11111111111122222222222222222222     000000000          000000000      p::::::pppppppp    xxxxxxx      xxxxxxx
+                                                                       p:::::p
+                                                                       p:::::p
+                                                                      p:::::::p
+                                                                      p:::::::p
+                                                                      p:::::::p
+                                                                      ppppppppp
+*/
+  @media (min-width: 1200px) {
+    html {
+      background-color:  var(--background-color);
+    }
+    .board{
+      display: none;
+    }
+
+    .board .card {
+      background-color: transparent;
+      width: 220px;
+      height: 300px;
+      border: 0.1rem solid var(--border-color);
+      perspective: 1000px;
+    }
+
+    .card {
+      font-size: 150%;
+      background-color: transparent;
+      width: 190px;
+      height: 259px;
+      border: 0.1rem solid var(--border-color);
+      perspective: 1000px;
+      margin-bottom: 1%;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.5s;
+      transform-style: preserve-3d;
+    }
+
+    .card:hover .card-inner {
+      /*transform: rotateY(180deg);*/
+    }
+
+    .card-front, .card-front-ascendant, .card-front-descendant,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+    }
+
+    .card-front {
+      color: white;
+      background:var(--background-card-color);
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      background:var(--background-card-color);
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .card-back h2 {
+      margin: 15% auto;
+      font-size: 200%;
+      font-weight: bold;
+    }
+
+    .card-front h2 {
+      margin: 50% auto;
+      font-size: 200%;
+      font-weight: bold;
+    }
+
+    .card-front-ascendant h2 {
+      margin: 80% auto;
+      font-size: 200%;
+      font-weight: bold;
+    }
+
+    .card-front-descendant h2 {
+      margin: 30% auto;
+      font-size: 200%;
+      font-weight: bold;
+    }
+
+    .card-front-ascendant {
+      color: white;
+      background: no-repeat;
+      background:var(--background-card-color);
+      background-size: contain;
+      background-position: center;
+    }
+
+    .card-front-descendant {
+      color: white;
+      background: no-repeat;
+      background:var(--background-card-color);
+      background-size: contain;
+      background-position: center;
+    }
+
+    .board .indicationCard, .board .playingCard {
+      justify-content: space-between;
+      display: flex;
+      align-items: center;
+
+    }
+
+    footer {
+      position: absolute;
+      bottom: 0;
+      margin: 0 10%;
+      /*display: flex;*/
+      display: none;
+    }
+
+
+    footer .card:hover {
+      transform: translateY(-10%);
+    }
+
+    #btnShowOff {
+      color: var(--font-color);
+      border-radius: 2%;
+      background-image: var(--background-card-color);
+
+    }
+  }
+
+/**
+     999999999          999999999      222222222222222
+   99:::::::::99      99:::::::::99   2:::::::::::::::22
+ 99:::::::::::::99  99:::::::::::::99 2::::::222222:::::2
+9::::::99999::::::99::::::99999::::::92222222     2:::::2
+9:::::9     9:::::99:::::9     9:::::9            2:::::2 ppppp   ppppppppp   xxxxxxx      xxxxxxx
+9:::::9     9:::::99:::::9     9:::::9            2:::::2 p::::ppp:::::::::p   x:::::x    x:::::x
+ 9:::::99999::::::9 9:::::99999::::::9         2222::::2  p:::::::::::::::::p   x:::::x  x:::::x
+  99::::::::::::::9  99::::::::::::::9    22222::::::22   pp::::::ppppp::::::p   x:::::xx:::::x
+    99999::::::::9     99999::::::::9   22::::::::222      p:::::p     p:::::p    x::::::::::x
+         9::::::9           9::::::9   2:::::22222         p:::::p     p:::::p     x::::::::x
+        9::::::9           9::::::9   2:::::2              p:::::p     p:::::p     x::::::::x
+       9::::::9           9::::::9    2:::::2              p:::::p    p::::::p    x::::::::::x
+      9::::::9           9::::::9     2:::::2       222222 p:::::ppppp:::::::p   x:::::xx:::::x
+     9::::::9           9::::::9      2::::::2222222:::::2 p::::::::::::::::p   x:::::x  x:::::x
+    9::::::9           9::::::9       2::::::::::::::::::2 p::::::::::::::pp   x:::::x    x:::::x
+   99999999           99999999        22222222222222222222 p::::::pppppppp    xxxxxxx      xxxxxxx
+                                                           p:::::p
+                                                           p:::::p
+                                                          p:::::::p
+                                                          p:::::::p
+                                                          p:::::::p
+                                                          ppppppppp
+ */
+@media (max-width: 992px) {
+  /* styles for tablets */
 }
 
-.card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  transition: transform 0.5s;
-  transform-style: preserve-3d;
-}
+/**
 
-.card:hover .card-inner {
-  /*transform: rotateY(180deg);*/
-}
 
-.card-front,.card-front-ascendant, .card-front-descendant, 
-.card-back {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-}
+77777777777777777777        66666666        888888888
+7::::::::::::::::::7       6::::::6       88:::::::::88
+7::::::::::::::::::7      6::::::6      88:::::::::::::88
+777777777777:::::::7     6::::::6      8::::::88888::::::8
+           7::::::7     6::::::6       8:::::8     8:::::8ppppp   ppppppppp   xxxxxxx      xxxxxxx
+          7::::::7     6::::::6        8:::::8     8:::::8p::::ppp:::::::::p   x:::::x    x:::::x
+         7::::::7     6::::::6          8:::::88888:::::8 p:::::::::::::::::p   x:::::x  x:::::x
+        7::::::7     6::::::::66666      8:::::::::::::8  pp::::::ppppp::::::p   x:::::xx:::::x
+       7::::::7     6::::::::::::::66   8:::::88888:::::8  p:::::p     p:::::p    x::::::::::x
+      7::::::7      6::::::66666:::::6 8:::::8     8:::::8 p:::::p     p:::::p     x::::::::x
+     7::::::7       6:::::6     6:::::68:::::8     8:::::8 p:::::p     p:::::p     x::::::::x
+    7::::::7        6:::::6     6:::::68:::::8     8:::::8 p:::::p    p::::::p    x::::::::::x
+   7::::::7         6::::::66666::::::68::::::88888::::::8 p:::::ppppp:::::::p   x:::::xx:::::x
+  7::::::7           66:::::::::::::66  88:::::::::::::88  p::::::::::::::::p   x:::::x  x:::::x
+ 7::::::7              66:::::::::66      88:::::::::88    p::::::::::::::pp   x:::::x    x:::::x
+77777777                 666666666          888888888      p::::::pppppppp    xxxxxxx      xxxxxxx
+                                                           p:::::p
+                                                           p:::::p
+                                                          p:::::::p
+                                                          p:::::::p
+                                                          p:::::::p
+                                                          ppppppppp
+*/
 
-.card-front {
-  color: white;
-  background: radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%);
-}
-
-.card-back {
-  transform: rotateY(180deg);
-  background-image: url(./skull.png), radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.card-back h2{
-  margin: 15% auto;
-  font-size: 200%;
-  font-weight: bold;
-}
-
-.card-front h2{
-  margin: 50% auto;
-  font-size: 200%;
-  font-weight: bold;
-}
-
-.card-front-ascendant h2{
-  margin: 80% auto;
-  font-size: 200%;
-  font-weight: bold;
-}
-
-.card-front-descendant h2{
-  margin: 30% auto;
-  font-size: 200%;
-  font-weight: bold;
-}
-
-.card-front-ascendant {
-  color: white;
-  background: no-repeat;
-  background-image: url(./fleche-vers-le-bas.png) , radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
-  background-size: contain;
-  background-position: center;
-}
-
-.card-front-descendant {
-  color: white;
-  background: no-repeat;
-  background-image: url(./fleches-vers-le-haut.png) , radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
-  background-size: contain;
-  background-position: center;
-}
-
-.board .indicationCard, .board .playingCard{
-  justify-content: space-between;
-  display: flex;
-  align-items: center;
-
-}
-
-footer{
-  position: absolute;
-  bottom: 0;
-  margin: 0 10%;
-  display: flex;
+@media (max-width: 768px) {
+  /* styles for tablets */
 }
 
 
-footer .card:hover{
-  transform: translateY(-10%);
+/**
+
+
+555555555555555555 77777777777777777777        66666666
+5::::::::::::::::5 7::::::::::::::::::7       6::::::6
+5::::::::::::::::5 7::::::::::::::::::7      6::::::6
+5:::::555555555555 777777777777:::::::7     6::::::6
+5:::::5                       7::::::7     6::::::6       ppppp   ppppppppp   xxxxxxx      xxxxxxx
+5:::::5                      7::::::7     6::::::6        p::::ppp:::::::::p   x:::::x    x:::::x
+5:::::5555555555            7::::::7     6::::::6         p:::::::::::::::::p   x:::::x  x:::::x
+5:::::::::::::::5          7::::::7     6::::::::66666    pp::::::ppppp::::::p   x:::::xx:::::x
+555555555555:::::5        7::::::7     6::::::::::::::66   p:::::p     p:::::p    x::::::::::x
+            5:::::5      7::::::7      6::::::66666:::::6  p:::::p     p:::::p     x::::::::x
+            5:::::5     7::::::7       6:::::6     6:::::6 p:::::p     p:::::p     x::::::::x
+5555555     5:::::5    7::::::7        6:::::6     6:::::6 p:::::p    p::::::p    x::::::::::x
+5::::::55555::::::5   7::::::7         6::::::66666::::::6 p:::::ppppp:::::::p   x:::::xx:::::x
+ 55:::::::::::::55   7::::::7           66:::::::::::::66  p::::::::::::::::p   x:::::x  x:::::x
+   55:::::::::55    7::::::7              66:::::::::66    p::::::::::::::pp   x:::::x    x:::::x
+     555555555     77777777                 666666666      p::::::pppppppp    xxxxxxx      xxxxxxx
+                                                           p:::::p
+                                                           p:::::p
+                                                          p:::::::p
+                                                          p:::::::p
+                                                          p:::::::p
+                                                          ppppppppp
+
+ */
+@media (max-width: 576px) {
+  /* styles for tablets */
 }
 
-#btnShowOff{
-  color: white;
-  border-radius: 2%;
-  background-image: radial-gradient(circle, rgba(224,38,22,1) 6%, rgba(196,17,17,1) 53%, rgba(27,0,0,1) 92%) ;
-  
-}
 
+/**
+Mobile : 360 x 640
+Mobile:  375 x 667
+Mobile : 360 x 720
+iPhone X : 375 x 812
+Pixel 2 : 411 x 731
+Tablette : 768 x 1024
+Ordinateur portable : 1366 x 768
+Ordinateur portable ou de bureau haute résolution : 1920 x 1080
+ */

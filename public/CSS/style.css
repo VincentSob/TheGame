@@ -135,11 +135,11 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     html {
       background-color:  var(--background-color);
     }
-    .board{
+    #board{
       display: none;
     }
 
-    .board .card {
+    #board .card {
       background-color: transparent;
       width: 220px;
       height: 300px;
@@ -230,7 +230,7 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
       background-position: center;
     }
 
-    .board .indicationCard, .board .playingCard {
+    #board .indicationCard, #board .playingCard {
       justify-content: space-between;
       display: flex;
       align-items: center;
@@ -241,10 +241,36 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
       position: absolute;
       bottom: 0;
       margin: 0 10%;
-      /*display: flex;*/
       display: none;
     }
 
+    #waitingScreen {
+      display: none;
+    }
+
+    #messages {
+      position: fixed; /* parent relativement positionné */
+      height: auto;
+      width: 25%; /* largeur fixe du conteneur */
+      display: none;
+      top: 10%;
+      bottom: 10%;
+      right: 10%;
+    }
+
+    #messages > #received{
+      top: 0;
+      position: fixed; /* élément positionné absolument */
+      width: 100%; /* largeur fixe de l'élément */
+      background-color: #f0f0f0; /* couleur de fond */
+    }
+
+    #messages > #toSend{
+      bottom: 0;
+      position: fixed; /* élément positionné absolument */
+      width: 100%; /* largeur fixe de l'élément */
+      background-color: #f0f0f0; /* couleur de fond */
+    }
 
     footer .card:hover {
       transform: translateY(-10%);
@@ -254,7 +280,11 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
       color: var(--font-color);
       border-radius: 2%;
       background-image: var(--background-card-color);
-
+      float: right;
+      margin-right: 10%;
+    }
+    #btnShowOff:hover {
+      content: "Cliquer pour cacher votre main";
     }
   }
 

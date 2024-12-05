@@ -1,130 +1,198 @@
+document.addEventListener("DOMContentLoaded", function () {
+    // Initialize localStorage variables
+    if (!localStorage.getItem("Pseudos")) localStorage.setItem("Pseudos", "");
+    if (!localStorage.getItem("state")) localStorage.setItem("state", "0");
+    if (!localStorage.getItem("gameId")) localStorage.setItem("gameId", "");
 
-// index.js
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
+    const socket = io.connect();
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+    // Function to update the UI based on the state
+    function updateUI(state) {
+        const startDiv = document.getElementById("start");
+        const joinDiv = document.getElementById("join");
+        const waitingDiv = document.getElementById("waitingScreen");
+        const messagesDiv = document.getElementById("messages");
+        const boardDiv = document.getElementById("board");
+        const footer = document.querySelector("footer");
+        const quit = document.getElementById("btnQuitGame");
 
-// Stockage des parties
-const parties = {};
-
-// Servir les fichiers statiques (CSS, JS, etc.)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Route principale pour servir la page HTML
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'theGame.html')); // Chemin vers votre fichier HTML
-});
-
-// Gestion des connexions Socket.io
-/*
-io.on('connection', (socket) => {
-    console.log('Un joueur s\'est connecté :', socket.id);
-
-    // Création d'une nouvelle partie
-    socket.on('creerPartie', (data) => {
-        const { nombreJoueurs, nomJoueur } = data;
-        const idPartie = socket.id; // Utiliser l'ID du socket comme identifiant de la partie
-        parties[idPartie] = {
-            nombreMaxJoueurs: nombreJoueurs,
-            joueurs: [{ id: socket.id, nom: nomJoueur }],
-            enCours: false, // Statut de la partie
-        };
-        socket.join(idPartie);
-        io.to(socket.id).emit('partieCree', { idPartie, message: 'Partie créée avec succès !' });
-        console.log(`Partie créée avec ID ${idPartie} pour ${nombreJoueurs} joueurs.`);
-    });
-
-    // Rejoindre une partie existante
-    socket.on('rejoindrePartie', (data) => {
-        const { idPartie, nomJoueur } = data;
-        const partie = parties[idPartie];
-
-        if (partie && partie.joueurs.length < partie.nombreMaxJoueurs) {
-            partie.joueurs.push({ id: socket.id, nom: nomJoueur });
-            socket.join(idPartie);
-            io.to(idPartie).emit('joueurRejoint', { nomJoueur });
-            console.log(`${nomJoueur} a rejoint la partie ${idPartie}.`);
-
-            // Démarrer la partie lorsque tous les joueurs sont connectés
-            if (partie.joueurs.length === partie.nombreMaxJoueurs) {
-                partie.enCours = true;
-                io.to(idPartie).emit('demarrerPartie', { message: 'La partie commence maintenant!' });
-                console.log(`La partie ${idPartie} commence.`);
-            }
-        } else {
-            io.to(socket.id).emit('erreur', { message: 'La partie est déjà pleine ou n\'existe pas.' });
+        if (state === "start") {
+            startDiv.style.display = "block";
+            joinDiv.style.display = "block";
+            waitingDiv.style.display = "none";
+            messagesDiv.style.display = "none";
+            boardDiv.style.display = "none";
+            footer.style.display = "none";
+            quit.style.display = "none";
+        } else if (state === "waiting") {
+            startDiv.style.display = "none";
+            joinDiv.style.display = "none";
+            waitingDiv.style.display = "block";
+            messagesDiv.style.display = "block";
+            boardDiv.style.display = "none";
+            footer.style.display = "none";
+            quit.style.display = "block";
+        } else if (state === "playing") {
+            startDiv.style.display = "none";
+            joinDiv.style.display = "none";
+            waitingDiv.style.display = "none";
+            messagesDiv.style.display = "none";
+            boardDiv.style.display = "block";
+            footer.style.display = "flex";
+            quit.style.display = "block";
         }
-    });
+    }
 
-    // Déconnexion d'un joueur
-    socket.on('disconnect', () => {
-        console.log('Un joueur s\'est déconnecté :', socket.id);
+    // Get initial state
+    let currentState = localStorage.getItem("state");
+    console.log("Current state:", currentState); // Debugging
 
-        // Rechercher la partie à laquelle le joueur était connecté
-        for (let idPartie in parties) {
-            let partie = parties[idPartie];
-            const index = partie.joueurs.findIndex(joueur => joueur.id === socket.id);
+    // Ensure valid state
+    const validStates = ["0", "10", "1"];
+    if (!validStates.includes(currentState)) {
+        localStorage.setItem("state", "0");
+        currentState = "0";
+    }
 
-            if (index !== -1) {
-                // Supprimer le joueur de la partie
-                const joueurParti = partie.joueurs.splice(index, 1)[0];
-                console.log(`Joueur ${joueurParti.nom} a quitté la partie ${idPartie}.`);
+    // Initial UI update
+    updateUI(currentState === "10" ? "waiting" : currentState === "0" ? "start" : "playing");
 
-                // Si la partie était en cours, la terminer en informant les autres joueurs
-                if (partie.enCours) {
-                    io.to(idPartie).emit('finPartie', { message: 'La partie est terminée car un joueur a quitté.' });
-                    console.log(`La partie ${idPartie} est terminée à cause de la déconnexion d'un joueur.`);
-                    delete parties[idPartie];
-                }
+    // Create Game button functionality
+    const createButton = document.getElementById("creerPartie");
+    if (createButton) {
+        createButton.addEventListener("click", function () {
+            const playerName = document.getElementById("nomJoueurCreer").value || "Guest";
+            const nbrPlayers = parseInt(document.getElementById("nombreJoueurs").value);
 
-                // Si tous les joueurs ont quitté, supprimer la partie
-                if (partie.joueurs.length === 0) {
-                    delete parties[idPartie];
-                    console.log(`Partie ${idPartie} supprimée (plus de joueurs connectés).`);
-                }
-                break;
+            if (!nbrPlayers || nbrPlayers < 1 || nbrPlayers > 5) {
+                alert("Please enter a valid number of players (1-5).");
+                return;
             }
-        }
+
+            localStorage.setItem("Pseudos", playerName);
+            socket.emit("NewGame", nbrPlayers, playerName);
+        });
+    }
+
+    // Join Game button functionality
+    const joinButton = document.getElementById("rejoindrePartie");
+    if (joinButton) {
+        joinButton.addEventListener("click", function () {
+            const playerName = document.getElementById("nomJoueurRejoindre").value || "Guest";
+            const gameKey = document.getElementById("idPartie").value;
+
+            if (!gameKey) {
+                alert("Please enter a valid game ID.");
+                return;
+            }
+
+            localStorage.setItem("Pseudos", playerName);
+            localStorage.setItem("gameId", gameKey);
+            socket.emit("JoinGame", gameKey, playerName);
+        });
+    }
+
+    // Handle joining a game
+    socket.on("hasJoinGame", (key, state) => {
+        localStorage.setItem("state", state);
+        localStorage.setItem("gameId", key);
+        updateUI(state === "10" ? "waiting" : "playing");
+
+        const waitingDiv = document.getElementById("waitingScreen");
+        waitingDiv.innerHTML = `<p>Welcome ${localStorage.getItem("Pseudos")}</p>
+                                <p>Waiting for game to start...</p>
+                                <p>You have joined Game ID: ${key}</p>`;
     });
-});*/
 
-// Gestion des erreurs du serveur HTTP
-server.on('error', (err) => {
-    console.error('Erreur serveur :', err);
+    // Handle sending messages
+    const sendMessageButton = document.getElementById("sendMessage");
+    if (sendMessageButton) {
+        sendMessageButton.addEventListener("click", function () {
+            const message = document.getElementById("messageToSend").value.trim();
+            if (message) {
+                socket.emit("sendMessage", message);
+                document.getElementById("messageToSend").value = "";
+            }
+        });
+    }
+
+    // Handle received messages
+    socket.on("receivedMessage", (message) => {
+        const messagesContainer = document.getElementById("received");
+        const messageElement = document.createElement("div");
+        messageElement.textContent = message;
+        messagesContainer.appendChild(messageElement);
+    });
+
+    // Handle quitting the game
+    const quitButton = document.getElementById("btnQuitGame");
+    if (quitButton) {
+        quitButton.addEventListener("click", function () {
+            const confirmation = confirm("Voulez-vous vraiment quitter la partie ?");
+            if (confirmation) {
+                const gameId = localStorage.getItem("gameId");
+                localStorage.setItem("state", "0");
+                localStorage.setItem("Pseudos", "");
+                localStorage.setItem("gameId", "");
+
+                socket.emit("quitGame", gameId);
+                updateUI("start");
+                document.getElementById("received").innerHTML = "";
+                location.reload(true);
+            }
+        });
+    }
+
+    const showOff = document.getElementById("btnShowOff");
+    if (showOff) {
+        showOff.addEventListener("click", function () {
+            console.log("click");
+            const footer = document.querySelector("footer");
+            if (footer.style.display === "flex") {
+                footer.style.display = "none"
+            } else {
+                footer.style.display = "flex"
+            }
+        });
+    }
+
+    // Handle game start event
+    socket.on("GameStarted", () => {
+        updateUI("playing");
+        console.log("The game has started!");
+    });
+
 });
 
-// Serveur écoute sur le port 8080
-server.listen(8080, () => {
-    console.log('Serveur démarré sur http://localhost:8080');
-});
-
-function darkModeUpdate(){
-    let html = document.querySelector('HTML');
-    console.log(html);
-    html.classList.toggle("darkMode");
-    html.classList.toggle("lightMode");
+function moveCard(e) {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", e.target.outerHTML); // Set card's HTML as data
+    e.target.classList.add("dragging"); // Add a visual cue for the dragged card
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+// Allows dragging over a valid target
+function overMoveCard(e) {
+    e.preventDefault(); // Prevent default to allow dropping
+    e.dataTransfer.dropEffect = "move";
+}
 
-    document.getElementById("btnShowOff").addEventListener("click", function() {
-        const footer = document.querySelector('footer');
-        if (footer.style.display === 'none'){
-            footer.style.display='';
-        }else{
-            footer.style.display = 'none';
-        }
-    });
+// Handles the drop event to append the card to the target container
+function dropCard(e) {
+    e.preventDefault(); // Prevent default behavior
+    const cardHTML = e.dataTransfer.getData("text/plain"); // Get the dragged card's HTML
+    const dropZone = e.currentTarget;
 
-    document.addEventListener("keydown", function(event) {
-        if (event.code === 'KeyD'){
-            darkModeUpdate();
+    // Ensure the drop zone accepts the card
+    if (dropZone.classList.contains("card")) {
+        // Find and remove the original card
+        const draggingCard = document.querySelector(".dragging");
+        dropZone.innerHTML = draggingCard.innerHTML;
+        console.log();
+        if (draggingCard) {
+            draggingCard.parentElement.removeChild(draggingCard); // Remove from original container
+            draggingCard.setAttribute("draggable","false");
         }
-        console.log(`Touche appuyée : ${event.key} (ou ${event.code})`);
-    });
-});
+    }
+    e.stopPropagation();
+    return false;
+}

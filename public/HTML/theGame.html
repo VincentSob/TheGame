@@ -3,28 +3,85 @@
   <head>
     <title>The Game</title>
     <link rel="stylesheet" type="text/css" href="../CSS/style.css">
+    <script src="/socket.io/socket.io.js"></script>
     <script src="../JS/theGamePlayer.js"></script>
   </head>
   <body>
   <h1>THE GAME</h1>
 
-  <div>
+  <div id="start">
     <h2>Créer une Partie</h2>
-    <input id="nomJoueurCreer" placeholder="Votre nom">
-    <input id="nombreJoueurs" type="number" min="1" max="5" placeholder="Nombre de joueurs (1-5)">
-    <button onclick="creerPartie()">Créer Partie</button>
+    <label for="nomJoueurCreer">Votre nom</label><input id="nomJoueurCreer">
+    <label for="nombreJoueurs">Nombre de joueurs (1-5)</label><input id="nombreJoueurs" type="number" min="1" max="5" >
+    <button  id="creerPartie">Créer Partie</button>
   </div>
 
-  <div>
+  <div id="join">
     <h2>Rejoindre une Partie</h2>
-    <input id="idPartie" placeholder="ID de la Partie">
-    <input id="nomJoueurRejoindre" placeholder="Votre nom">
-    <button onclick="rejoindrePartie()">Rejoindre Partie</button>
+    <label for="idPartie">ID de la Partie</label><input id="idPartie">
+    <label for="nomJoueurRejoindre">Votre nom</label><input id="nomJoueurRejoindre">
+    <button  id="rejoindrePartie">Rejoindre Partie</button>
   </div>
 
-  <div id="messages"></div>
-    <div class="board">
-    
+
+  <div id="waitingScreen">
+  </div>
+
+
+  <div id="messages">
+    <div id="received"></div>
+    <div id="toSend">
+      <label for="messageToSend">type your message here</label><input id="messageToSend">
+      <button  id="sendMessage">📪</button>
+    </div>
+  </div>
+    <div id="board">
+
+      <div class="playingCard">
+        <div class="card" onDragOver="return overMoveCard(event)" onDrop="return dropCard(event)">
+          <div class="card-inner">
+            <div class="card-front-ascendant">
+              <h2>1</h2>
+            </div>
+            <div class="card-back">
+              <h2>The Game</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" onDragOver="return overMoveCard(event)" onDrop="return dropCard(event)">
+          <div class="card-inner">
+            <div class="card-front-descendant">
+              <h2>100</h2>
+            </div>
+            <div class="card-back">
+              <h2>The Game</h2>
+            </div>
+          </div>
+        </div>
+        <div class="card" onDragOver="return overMoveCard(event)" onDrop="return dropCard(event)">
+          <div class="card-inner">
+            <div class="card-front-ascendant">
+              <h2>1</h2>
+            </div>
+            <div class="card-back">
+              <h2>The Game</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" onDragOver="return overMoveCard(event)" onDrop="return dropCard(event)">
+          <div class="card-inner">
+            <div class="card-front-descendant">
+              <h2>100</h2>
+            </div>
+            <div class="card-back">
+              <h2>The Game</h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="indicationCard">
           <div class="card">
             <div class="card-inner">
@@ -36,7 +93,7 @@
               </div>
             </div>
           </div>
-      
+
           <div class="card">
             <div class="card-inner">
               <div class="card-front">
@@ -57,7 +114,7 @@
               </div>
             </div>
           </div>
-      
+
           <div class="card">
             <div class="card-inner">
               <div class="card-front">
@@ -68,63 +125,19 @@
               </div>
             </div>
           </div>
-        <button type="button" id="btnShowOff">∇</button>
-        </div>
-
-
-
-    <div class="playingCard">
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front-ascendant">
-            <h2>1</h2>
-          </div>
-          <div class="card-back">
-            <h2>The Game</h2>
-          </div>
-        </div>
-      </div>
-  
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front-descendant">
-            <h2>100</h2>
-          </div>
-          <div class="card-back">
-            <h2>The Game</h2>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front-ascendant">
-            <h2>1</h2>
-          </div>
-          <div class="card-back">
-            <h2>The Game</h2>
-          </div>
-        </div>
-      </div>
-  
-      <div class="card">
-        <div class="card-inner">
-          <div class="card-front-descendant">
-            <h2>100</h2>
-          </div>
-          <div class="card-back">
-            <h2>The Game</h2>
-          </div>
-        </div>
       </div>
     </div>
-    
+
+  <div id="btnShowOffContainer">
+    <button type="button" id="btnShowOff" title="Cacher votre main">∇</button>
   </div>
-  
-  
+  <div id="btnQuitContainer" style="position: fixed; bottom: 10px; left: 10px;">
+    <button id="btnQuitGame" >Quitter la Partie</button>
   </div>
+
   </body>
-  <footer>
-    <div class="card">
+  <footer onDragStart="moveCard(event)">
+    <div class="card" draggable="true">
       <div class="card-inner">
         <div class="card-front">
           <h2>Number</h2>
@@ -134,7 +147,7 @@
         </div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" draggable="true">
       <div class="card-inner">
         <div class="card-front">
           <h2>Number</h2>
@@ -144,7 +157,7 @@
         </div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" draggable="true">
       <div class="card-inner">
         <div class="card-front">
           <h2>Number</h2>
@@ -154,7 +167,7 @@
         </div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" draggable="true">
       <div class="card-inner">
         <div class="card-front">
           <h2>Number</h2>
@@ -164,7 +177,7 @@
         </div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" draggable="true">
       <div class="card-inner">
         <div class="card-front">
           <h2>Number</h2>
@@ -174,7 +187,7 @@
         </div>
       </div>
     </div>
-    <div class="card">
+    <div class="card" draggable="true">
       <div class="card-inner">
         <div class="card-front">
           <h2>Number</h2>

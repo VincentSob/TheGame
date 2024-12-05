@@ -1,96 +1,89 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path'); // Pour gérer les chemins des fichiers
-
+const express = require("express");
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
 
-// Servir les fichiers statiques (CSS, JS, etc.)
-app.use(express.static(path.join(__dirname, 'public'))); // Assurez-vous que vos fichiers sont dans le dossier 'public'
+let game = {
+    player: {},
+    games: {},
+};
 
-// Route principale pour servir la page HTML
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/HTML/theGame.html')); // Chemin vers votre fichier HTML
+app.use(express.static("Public"));
+
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/Public/HTML/theGame.html");
 });
 
-// Stockage des parties
-const parties = {};
+server.listen(3000, () => {
+    console.log("Server is running on port 3000");
+});
 
-// Gestion des connexions Socket.io
-io.on('connection', (socket) => {
-    console.log('Un joueur s\'est connecté :', socket.id);
+io.on("connection", (socket) => {
+    const userId = socket.id;
 
-    // Création d'une nouvelle partie
-    socket.on('creerPartie', (data) => {
-        const { nombreJoueurs, nomJoueur } = data;
-        const idPartie = socket.id; // Utiliser l'ID du socket comme identifiant de la partie
-        parties[idPartie] = {
-            nombreMaxJoueurs: nombreJoueurs,
-            joueurs: [{ id: socket.id, nom: nomJoueur }],
-            enCours: false, // Statut de la partie
+    // Handle creating a new game
+    socket.on("NewGame", (nbrPlayer, name) => {
+        const key = generateUniqueGameKey(userId);
+        game.games[key] = {
+            players: { [userId]: name },
+            maxPlayers: nbrPlayer,
         };
-        socket.join(idPartie);
-        io.to(socket.id).emit('partieCree', { idPartie, message: 'Partie créée avec succès !' });
-        console.log(`Partie créée avec ID ${idPartie} pour ${nombreJoueurs} joueurs.`);
-    });
+        game.player[userId] = key;
 
-    // Rejoindre une partie existante
-    socket.on('rejoindrePartie', (data) => {
-        const { idPartie, nomJoueur } = data;
-        const partie = parties[idPartie];
-
-        if (partie && partie.joueurs.length < partie.nombreMaxJoueurs) {
-            partie.joueurs.push({ id: socket.id, nom: nomJoueur });
-            socket.join(idPartie);
-            io.to(idPartie).emit('joueurRejoint', { nomJoueur });
-            console.log(`${nomJoueur} a rejoint la partie ${idPartie}.`);
-
-            // Démarrer la partie lorsque tous les joueurs sont connectés
-            if (partie.joueurs.length === partie.nombreMaxJoueurs) {
-                partie.enCours = true;
-                io.to(idPartie).emit('demarrerPartie', { message: 'La partie commence maintenant!' });
-                console.log(`La partie ${idPartie} commence.`);
-            }
+        socket.join(key);
+        if (nbrPlayer === 1) {
+            socket.emit("hasJoinGame", key, "1");
+            io.to(key).emit("GameStarted");
         } else {
-            io.to(socket.id).emit('erreur', { message: 'La partie est déjà pleine ou n\'existe pas.' });
+            socket.emit("hasJoinGame", key, "10");
         }
+        io.to(key).emit("receivedMessage", `${name} created the game: ${key}`);
     });
 
-    // Déconnexion d'un joueur
-    socket.on('disconnect', () => {
-        console.log('Un joueur s\'est déconnecté :', socket.id);
+    // Handle joining a game
+    socket.on("JoinGame", (key, name) => {
+        if (game.games[key]) {
+            game.games[key].players[userId] = name;
+            game.player[userId] = key;
 
-        // Rechercher la partie à laquelle le joueur était connecté
-        for (let idPartie in parties) {
-            let partie = parties[idPartie];
-            const index = partie.joueurs.findIndex(joueur => joueur.id === socket.id);
-
-            if (index !== -1) {
-                // Supprimer le joueur de la partie
-                const joueurParti = partie.joueurs.splice(index, 1)[0];
-                console.log(`Joueur ${joueurParti.nom} a quitté la partie ${idPartie}.`);
-
-                // Si la partie était en cours, la terminer en informant les autres joueurs
-                if (partie.enCours) {
-                    io.to(idPartie).emit('finPartie', { message: 'La partie est terminée car un joueur a quitté.' });
-                    console.log(`La partie ${idPartie} est terminée à cause de la déconnexion d'un joueur.`);
-                    delete parties[idPartie];
-                }
-
-                // Si tous les joueurs ont quitté, supprimer la partie
-                if (partie.joueurs.length === 0) {
-                    delete parties[idPartie];
-                    console.log(`Partie ${idPartie} supprimée (plus de joueurs connectés).`);
-                }
-                break;
+            socket.join(key);
+            const playerCount = Object.keys(game.games[key].players).length;
+            if (playerCount === game.games[key].maxPlayers) {
+                io.to(key).emit("GameStarted");
             }
+            socket.emit("hasJoinGame", key, playerCount === game.games[key].maxPlayers ? "1" : "10");
+        } else {
+            socket.emit("error", "Game not found");
+        }
+    });
+
+    // Handle sending messages
+    socket.on("sendMessage", (message) => {
+        const gameKey = game.player[userId];
+        if (gameKey) {
+            io.to(gameKey).emit(
+                "receivedMessage",
+                `${game.games[gameKey].players[userId]}: ${message}`
+            );
+        }
+    });
+
+    // Handle player disconnection
+    socket.on("disconnect", () => {
+        const gameKey = game.player[userId];
+        if (gameKey && game.games[gameKey]) {
+            delete game.games[gameKey].players[userId];
+            delete game.player[userId];
         }
     });
 });
+function generateUniqueGameKey(userId) {
+    let key = reduceRandomString(userId, 6);
+    return game.games[key] ? generateUniqueGameKey(userId) : key;
+}
 
-// Serveur écoute sur le port 8080
-server.listen(8080, () => {
-    console.log('Serveur démarré sur http://localhost:8080');
-});
+function reduceRandomString(original, newLength) {
+    const chars = Array.from(original);
+    const shuffled = chars.slice().sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, newLength).join('');
+}

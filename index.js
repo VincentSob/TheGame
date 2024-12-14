@@ -3,7 +3,7 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
-let game = {
+var game = {
     player: {},
     games: {},
 };
@@ -21,35 +21,17 @@ server.listen(3000, () => {
 io.on("connection", (socket) => {
     const userId = socket.id;
 
-    // Handle creating a new game
-    socket.on("NewGame", (nbrPlayer, name) => {
-        const key = generateUniqueGameKey(userId);
-        game.games[key] = {
-            players: { [userId]: name },
-            maxPlayers: nbrPlayer,
-        };
-        game.player[userId] = key;
-
-        socket.join(key);
-        if (nbrPlayer === 1) {
-            socket.emit("hasJoinGame", key, "1");
-            io.to(key).emit("GameStarted");
-        } else {
-            socket.emit("hasJoinGame", key, "10");
-        }
-        io.to(key).emit("receivedMessage", `${name} created the game: ${key}`);
-    });
-
     // Handle joining a game
     socket.on("JoinGame", (key, name) => {
         if (game.games[key]) {
-            game.games[key].players[userId] = name;
+            game.games[key].players[userId] = {name : name, hand: []};
             game.player[userId] = key;
 
             socket.join(key);
             const playerCount = Object.keys(game.games[key].players).length;
             if (playerCount === game.games[key].maxPlayers) {
                 io.to(key).emit("GameStarted");
+                startingDealCards(game.games[key].deck, game.games[key].maxPlayers,userId); // 5 cards per player as an example
             }
             socket.emit("hasJoinGame", key, playerCount === game.games[key].maxPlayers ? "1" : "10");
         } else {
@@ -63,7 +45,7 @@ io.on("connection", (socket) => {
         if (gameKey) {
             io.to(gameKey).emit(
                 "receivedMessage",
-                `${game.games[gameKey].players[userId]}: ${message}`
+                `${game.games[gameKey].players[userId].name}: ${message}`
             );
         }
     });
@@ -81,22 +63,25 @@ io.on("connection", (socket) => {
     socket.on("NewGame", (nbrPlayer, name) => {
         const key = generateUniqueGameKey(userId);
         const deck = generateDeck(); // Create and shuffle a deck
-        var hands = startingDealCards(deck, nbrPlayer); // 5 cards per player as an example
+
 
         game.games[key] = {
-            players: { [userId]: { name, hand: hands[] } }, // Assign the first hand to the creator
+            players:[],
             maxPlayers: nbrPlayer,
-            deck, // Remaining deck for the game
-            cardPerPlayer
+            deck: deck, // Remaining deck for the game
+            cardPerPlayer :0
         };
 
+        game.games[key].players[userId] = {name : name, hand:[]}
         game.player[userId] = key;
+
+
 
         socket.join(key);
 
         if (nbrPlayer === 1) {
             socket.emit("hasJoinGame", key, "1");
-            io.to(key).emit("GameStarted", hands[0]); // Send hand to the player
+            io.to(key).emit("GameStarted"); // Send hand to the player
         } else {
             socket.emit("hasJoinGame", key, "10");
         }
@@ -104,44 +89,15 @@ io.on("connection", (socket) => {
         io.to(key).emit("receivedMessage", `${name} created the game: ${key}`);
     });
 
-    function generateDeck () {
-        var deck = Array.from({ length : 98}, (v, k) => k + 2);
-        var suffledDeck = deck.sort((a, b) => 0.5 - Math.random()); // from https://dev.to/codebubb/how-to-shuffle-an-array-in-javascript-2ikj#:~:text=The%20first%20and%20simplest%20way,)%20%3D%3E%200.5%20%2D%20Math.
-
-        return suffledDeck;
-    };
-
-    function startingDealCards (gameDeck, nbrPlayer) {
-        var cardToDeal = 5;
-        // ajouter la condition pour le nombre de cartes par joueurs 
-        // if (?) {
-        // cardToDeal = X;
-        // }
-        games.game[key].players.forEach((currentPlayer) => {
-            // currentPlayer => player n
-            dealCards(cardToDeal, gameDeck, currentPlayer)
-        });
-        cardPerPlayer = cardToDeal;
-    };
-
-    function dealCards(cardToDeal, gameDeck, currentPlayer) {
-        var cards = [];
-        var i = 0;
-
-        while (i < cardToDeal && gameDeck.length != 0) {
-            cards.append(gameDeck.shift());
-            i++;
+    socket.on("EndTurn", (nbrPlayer) => {
+        const gameKey = game.player[userId];
+        //partieFailed?=
+        if(game[gameKey].players.hand.length > (nbrPlayer-2)){
+         handleFailedPartie();
         }
-        currentPlayer.hand = cards;
-        io.socket.socket(currentPlayer.userId).emit("cardDealed", (cards));
-    };
-
-    socket.on("EndTurn", (nbrPlayer, name) => {
-        partieFailed?=>handleFailedPartie();
-
-        partieContinue?
-            => cardsToDeal = games.game[key].cardPerPlayer - games.game[key].players[id].hand.length;
-            => dealCards(cardsToDeal, games.game[key].gameDeck, games.game[key].players[id]);
+        //  partieContinue?
+        //    => cardsToDeal = games.game[key].cardPerPlayer - games.game[key].players[id].hand.length;
+        //    => dealCards(cardsToDeal, games.game[key].gameDeck, games.game[key].players[id]);
         // permet de gerer la fin d'un tour avec verification si la partie est perdu ou si elle continue
         // deal les nouvelles cartes avant de passer au joueur suivant
         // verifie si la partie est gagné si elle est gagné affiche l'écran de win ? et permet de retourner au menu
@@ -150,7 +106,7 @@ io.on("connection", (socket) => {
         // passe le joueur suivant au state playing et le joueur actuel au state waiting
     });
     
-    socket.on("cardPlaced", (nbrPlayer, name) => {
+    socket.on("cardPlaced", () => {
         // verifie la validité du move si move invalide (carte modifié en inspecter l'élément ou autre envoyer un message d'erreur à la source)
         // si erreur emit("invalidMoveDone")
         // si move valide emit("CardPlayed") et mise a jours de la main du joueur;
@@ -159,7 +115,7 @@ io.on("connection", (socket) => {
 
     function handleFailedPartie() {
         // L passe les joueurs au statue ExitScreen avec affichage du score.
-    };
+    }
 
     function handleWinnedPartie() {
         // L passe les joueurs au statue ExitScreen avec affichage du score.
@@ -169,7 +125,7 @@ io.on("connection", (socket) => {
 
 // Helper functions
 function generateUniqueGameKey(userId) {
-    let key = reduceRandomString(userId, 6);
+    var key = reduceRandomString(userId, 6);
     return game.games[key] ? generateUniqueGameKey(userId) : key;
 }
 
@@ -178,6 +134,60 @@ function reduceRandomString(original, newLength) {
     const shuffled = chars.slice().sort(() => Math.random() - 0.5);
     return shuffled.slice(0, newLength).join('');
 }
+function generateDeck () {
+    var deck = Array.from({ length : 98}, (v, k) => k + 2);
+    // from https://dev.to/codebubb/how-to-shuffle-an-array-in-javascript-2ikj#:~:text=The%20first%20and%20simplest%20way,)%20%3D%3E%200.5%20%2D%20Math.
+    return deck.sort(() => 0.5 - Math.random());
+}
 
+function startingDealCards (gameDeck, nbrPlayer,userId) {
+    const gameKey = game.player[userId];
+    var cardToDeal;
+    (nbrPlayer === 2)? cardToDeal=7 : (nbrPlayer === 3 || nbrPlayer===4)? cardToDeal=6 :cardToDeal= 5;
+    // ajouter la condition pour le nombre de cartes par joueurs
+    // if (?) {
+    // cardToDeal = X;
+    // }
+    console.log("Avant ");
+    console.log(userId);
+    console.log(game);
+    console.log(gameKey);
+    console.log(game.games[gameKey]);
+    console.log("before foreach");
+    console.log(game.games[gameKey].players);
+    var playerKeys = game.games[gameKey].players.entries();
+    console.log(playerKeys);
+    for (var [key, value] of Object.entries(game.games[gameKey].players)) {
+        var currentPlayer=game.games[gameKey].players[key];
+        console.log("current player");
+        console.log(currentPlayer);
+        dealCards(cardToDeal, gameDeck, currentPlayer,key)
+    }
+    console.log("after foreach");
+    game.games[gameKey].cardPerPlayer = cardToDeal;
+
+    console.log("Après TOUT ");
+    console.log(userId);
+    console.log(game);
+    console.log(gameKey);
+    console.log(game.games[gameKey]);
+}
+
+function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
+    var cards = [];
+    var i = 0;
+
+    while (i < cardToDeal && gameDeck.length > 0) {
+        cards.push(gameDeck.shift());
+        i++;
+    }
+
+    console.log("CARDS ICI")
+    console.log(cards);
+    currentPlayer.hand= cards;
+    game.games[game.player[userId]].players[userId].hand =cards;
+    io.to(userId).emit("cardDealed", (cards));
+
+}
 
 

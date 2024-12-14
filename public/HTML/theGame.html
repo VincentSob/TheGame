@@ -8,21 +8,21 @@
   </head>
   <body>
   <h1>THE GAME</h1>
+  <div id="menu">
+    <div id="start">
+      <h2>Créer une Partie</h2>
+      <label for="nomJoueurCreer">Votre nom </label><input id="nomJoueurCreer" size="15">
+      <label for="nombreJoueurs">Joueurs (1-5) </label><input id="nombreJoueurs" type="number" min="1" max="5" size="6">
+      <button  id="creerPartie">Créer Partie</button>
+    </div>
 
-  <div id="start">
-    <h2>Créer une Partie</h2>
-    <label for="nomJoueurCreer">Votre nom</label><input id="nomJoueurCreer">
-    <label for="nombreJoueurs">Nombre de joueurs (1-5)</label><input id="nombreJoueurs" type="number" min="1" max="5" >
-    <button  id="creerPartie">Créer Partie</button>
+    <div id="join">
+      <h2>Rejoindre une Partie</h2>
+      <label for="nomJoueurRejoindre">Votre nom </label><input id="nomJoueurRejoindre" size="15">
+      <label for="idPartie">ID de la Partie </label><input id="idPartie" size="6" len>
+      <button  id="rejoindrePartie">Rejoindre Partie</button>
+    </div>
   </div>
-
-  <div id="join">
-    <h2>Rejoindre une Partie</h2>
-    <label for="idPartie">ID de la Partie</label><input id="idPartie">
-    <label for="nomJoueurRejoindre">Votre nom</label><input id="nomJoueurRejoindre">
-    <button  id="rejoindrePartie">Rejoindre Partie</button>
-  </div>
-
 
   <div id="waitingScreen">
   </div>
@@ -36,7 +36,6 @@
     </div>
   </div>
     <div id="board">
-
       <div class="playingCard">
         <div class="card" onDragOver="return overMoveCard(event)" onDrop="return dropCard(event)">
           <div class="card-inner">
@@ -44,7 +43,7 @@
               <h2>1</h2>
             </div>
             <div class="card-back">
-              <h2>The Game</h2>
+              <h2>FROM 1 TO 100</h2>
             </div>
           </div>
         </div>
@@ -55,7 +54,7 @@
               <h2>100</h2>
             </div>
             <div class="card-back">
-              <h2>The Game</h2>
+              <h2>FROM 100 TO 1</h2>
             </div>
           </div>
         </div>
@@ -65,7 +64,7 @@
               <h2>1</h2>
             </div>
             <div class="card-back">
-              <h2>The Game</h2>
+              <h2>FROM 1 TO 100</h2>
             </div>
           </div>
         </div>
@@ -76,58 +75,12 @@
               <h2>100</h2>
             </div>
             <div class="card-back">
-              <h2>The Game</h2>
+              <h2>FROM 100 TO 1</h2>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="indicationCard">
-          <div class="card">
-            <div class="card-inner">
-              <div class="card-front">
-                <h2>1</h2>
-              </div>
-              <div class="card-back">
-                <h2>The Game</h2>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-inner">
-              <div class="card-front">
-                <h2>100</h2>
-              </div>
-              <div class="card-back">
-                <h2>The Game</h2>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-inner">
-              <div class="card-front">
-                <h2>1</h2>
-              </div>
-              <div class="card-back">
-                <h2>The Game</h2>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-inner">
-              <div class="card-front">
-                <h2>100</h2>
-              </div>
-              <div class="card-back">
-                <h2>The Game</h2>
-              </div>
-            </div>
-          </div>
-      </div>
     </div>
-
   <div id="btnShowOffContainer">
     <button type="button" id="btnShowOff" title="Cacher votre main">∇</button>
   </div>
@@ -136,6 +89,9 @@
   </div>
 
   </body>
+  <!-- Ajout d'un bouton de fin de tour -->
+  <!-- Ajout d'une section "fin de partie" pour afficher le tableau des scores -->
+  <!-- Ajout d'une icone d'help qui affiche les raccourcis en transparence sur l'écran au survol de manière a pouvoir afficher les raccourcis -->
   <footer onDragStart="moveCard(event)">
     <div class="card" draggable="true">
       <div class="card-inner">

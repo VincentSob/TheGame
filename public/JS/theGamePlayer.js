@@ -1,3 +1,6 @@
+
+var hand = [];
+
 document.addEventListener("DOMContentLoaded", function () {
     // Initialize localStorage variables
     if (!localStorage.getItem("Pseudos")) localStorage.setItem("Pseudos", "");
@@ -5,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!localStorage.getItem("gameId")) localStorage.setItem("gameId", "");
 
     const socket = io.connect();
+    var playerHand = [];
 
     // Function to update the UI based on the state
     function updateUI(state) {
@@ -15,6 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const boardDiv = document.getElementById("board");
         const footer = document.querySelector("footer");
         const quit = document.getElementById("btnQuitGame");
+        const showOff = document.getElementById("btnShowOff");
 
         if (state === "start") {
             startDiv.style.display = "block";
@@ -24,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
             boardDiv.style.display = "none";
             footer.style.display = "none";
             quit.style.display = "none";
+            showOff.style.display = "none";
         } else if (state === "waiting") {
             startDiv.style.display = "none";
             joinDiv.style.display = "none";
@@ -32,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
             boardDiv.style.display = "none";
             footer.style.display = "none";
             quit.style.display = "block";
+            showOff.style.display = "none";
         } else if (state === "playing") {
             startDiv.style.display = "none";
             joinDiv.style.display = "none";
@@ -40,7 +47,8 @@ document.addEventListener("DOMContentLoaded", function () {
             boardDiv.style.display = "block";
             footer.style.display = "flex";
             quit.style.display = "block";
-        }
+            showOff.style.display = "inline-block";
+        }// ajouter le state ExitScreen (page de score si win le score des joueurs si loose le score de cartes restantes)
     }
 
     // Get initial state
@@ -82,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const gameKey = document.getElementById("idPartie").value;
 
             if (!gameKey) {
-                alert("Please enter a valid game ID.");
+                alert("Aucune partie avec cette id.");
                 return;
             }
 
@@ -103,6 +111,29 @@ document.addEventListener("DOMContentLoaded", function () {
                                 <p>Waiting for game to start...</p>
                                 <p>You have joined Game ID: ${key}</p>`;
     });
+
+    // ajouter un socket.on "cardDealed" => 
+    socket.on("cardDealed", (cards) => {
+        hand = cards;
+        console.log(cards);
+        handUpdate();
+
+    });
+
+    socket.on("invalidMoveDone", () => {
+        console.log("Merci d\'annuler le dernier move");
+    });
+
+    socket.on("cardPlayed", () => {
+        // affiche la carte joué par le joueurs si la source est différente du joueur actuel
+        // si la carte est joué par le joueur actuel remove la carte du tableau playerHand
+        //if (actual == emmiter) {
+            // needed ?? => a mettre dans invalid move done
+        //} else {
+          //  diplayPlayedCard();
+       // }
+    });
+
 
     // Handle sending messages
     const sendMessageButton = document.getElementById("sendMessage");
@@ -158,10 +189,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Handle game start event
     socket.on("GameStarted", () => {
+        //init
+        //update
         updateUI("playing");
         console.log("The game has started!");
     });
-
 });
 
 function moveCard(e) {
@@ -178,6 +210,10 @@ function overMoveCard(e) {
 
 // Handles the drop event to append the card to the target container
 function dropCard(e) {
+
+    // ajouter la verification si move valide
+    // ajouter un emit cardPlaced to master
+
     e.preventDefault(); // Prevent default behavior
     const cardHTML = e.dataTransfer.getData("text/plain"); // Get the dragged card's HTML
     const dropZone = e.currentTarget;
@@ -196,3 +232,55 @@ function dropCard(e) {
     e.stopPropagation();
     return false;
 }
+
+function handUpdate() {
+    // Check if 'hand' is defined
+    if (typeof hand !== "object" || hand === null) {
+        console.error("The 'hand' object is not defined or is invalid.");
+        return;
+    }
+
+    // Remove the existing footer
+    var footer = document.querySelector("footer");
+    if (footer) footer.remove();
+
+    // Create a new footer element
+    footer = document.createElement("footer");
+
+    // Create a container div with a draggable attribute
+
+    // Iterate through the hand object and populate cards
+    for (var handKey in hand) {
+        if (hand.hasOwnProperty(handKey)) {
+
+            var div = document.createElement("div");
+            div.className = "card";
+            div.setAttribute("draggable", "true");
+
+            console.log(handKey);
+
+            var div1 = document.createElement("div");
+            div1.className = "card-inner";
+
+            var div2 = document.createElement("div");
+            div2.className = "card-front";
+            div2.innerHTML = `<h2>${hand[handKey]}</h2>`; // Correct string interpolation
+
+            var div3 = document.createElement("div");
+            div3.className = "card-back"; // Changed class name for clarity
+            div3.innerHTML = `<h2>The Game</h2>`;
+
+            div1.appendChild(div2);
+            div1.appendChild(div3);
+            div.appendChild(div1);
+
+
+            // Append the new structure to the footer and then to the body
+            footer.appendChild(div);
+        }
+    }
+
+    document.body.appendChild(footer);
+}
+
+

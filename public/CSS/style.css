@@ -132,11 +132,43 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
                                                                       ppppppppp
 */
   @media (min-width: 1200px) {
+    h1{
+      font-size: xx-large;
+      width: fit-content;
+      margin: 2.75% auto;
+    }
+
     html {
       background-color:  var(--background-color);
     }
     #board{
       display: none;
+    }
+
+    #menu{
+      margin: auto auto;
+      width: fit-content;
+      display: block;
+
+    }
+
+    h2{
+      margin: 2.5% auto;
+      width: fit-content;
+    }
+
+    button{
+      margin: 5% auto;
+      display: inline-block;
+    }
+
+    menu label, menu input{
+      margin: auto auto;
+      width: fit-content;
+
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
 
     #board .card {
@@ -166,8 +198,8 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
       transform-style: preserve-3d;
     }
 
-    .card:hover .card-inner {
-      /*transform: rotateY(180deg);*/
+    #board .playingCard .card:hover .card-inner {
+      transform: rotateY(180deg);
     }
 
     .card-front, .card-front-ascendant, .card-front-descendant,
@@ -202,19 +234,13 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
       font-weight: bold;
     }
 
-    .card-front-ascendant h2 {
-      margin: 80% auto;
+    .card-front-ascendant h2, .card-front-descendant h2 {
+      margin: 40% auto;
       font-size: 200%;
       font-weight: bold;
     }
 
-    .card-front-descendant h2 {
-      margin: 30% auto;
-      font-size: 200%;
-      font-weight: bold;
-    }
-
-    .card-front-ascendant {
+    .card-front-ascendant, .card-front-descendant {
       color: white;
       background: no-repeat;
       background:var(--background-card-color);
@@ -222,15 +248,7 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
       background-position: center;
     }
 
-    .card-front-descendant {
-      color: white;
-      background: no-repeat;
-      background:var(--background-card-color);
-      background-size: contain;
-      background-position: center;
-    }
-
-    #board .indicationCard, #board .playingCard {
+    #board .playingCard {
       justify-content: space-between;
       display: flex;
       align-items: center;
@@ -238,9 +256,9 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     }
 
     footer {
-      position: absolute;
+      position: sticky;
       bottom: 0;
-      margin: 0 10%;
+      margin: -0.25% 15%;
       display: none;
     }
 
@@ -277,11 +295,13 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     }
 
     #btnShowOff {
+      display: flex;
+      position: sticky;
+      bottom: 0;
       color: var(--font-color);
       border-radius: 2%;
       background-image: var(--background-card-color);
       float: right;
-      margin-right: 10%;
     }
     #btnShowOff:hover {
       content: "Cliquer pour cacher votre main";

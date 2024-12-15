@@ -144,33 +144,12 @@ function startingDealCards (gameDeck, nbrPlayer,userId) {
     const gameKey = game.player[userId];
     var cardToDeal;
     (nbrPlayer === 2)? cardToDeal=7 : (nbrPlayer === 3 || nbrPlayer===4)? cardToDeal=6 :cardToDeal= 5;
-    // ajouter la condition pour le nombre de cartes par joueurs
-    // if (?) {
-    // cardToDeal = X;
-    // }
-    console.log("Avant ");
-    console.log(userId);
-    console.log(game);
-    console.log(gameKey);
-    console.log(game.games[gameKey]);
-    console.log("before foreach");
-    console.log(game.games[gameKey].players);
     var playerKeys = game.games[gameKey].players.entries();
-    console.log(playerKeys);
     for (var [key, value] of Object.entries(game.games[gameKey].players)) {
         var currentPlayer=game.games[gameKey].players[key];
-        console.log("current player");
-        console.log(currentPlayer);
         dealCards(cardToDeal, gameDeck, currentPlayer,key)
     }
-    console.log("after foreach");
     game.games[gameKey].cardPerPlayer = cardToDeal;
-
-    console.log("Après TOUT ");
-    console.log(userId);
-    console.log(game);
-    console.log(gameKey);
-    console.log(game.games[gameKey]);
 }
 
 function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
@@ -182,8 +161,6 @@ function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
         i++;
     }
 
-    console.log("CARDS ICI")
-    console.log(cards);
     currentPlayer.hand= cards;
     game.games[game.player[userId]].players[userId].hand =cards;
     io.to(userId).emit("cardDealed", (cards));

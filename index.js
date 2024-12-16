@@ -108,7 +108,7 @@ io.on("connection", (socket) => {
     socket.on("EndTurn", () => {
         const gameKey = stock.player[userId];
         var maxCard= stock.games[gameKey].cardPerPlayer;
-        if((stock.games[gameKey].players[userId].hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && stock.games[gameKey].players[userId].hand.length > (maxCard-1))) {
+        if((stock.games[gameKey].players[userId].hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && stock.games[gameKey].players[userId].hand.length > (maxCard-1))) { //TODO
             handleFailedPartie();
             return;
         }

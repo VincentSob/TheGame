@@ -1,7 +1,7 @@
 
 var hand = [];
 var piles =[1,1,100,100];
-var handsize=0;
+var handSize=0;
 var nbInDeckCard = 99;
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
         nbInDeckCard=nbrCarteRestante;
         hand = cards;
         hand.sort((a, b) => a - b);
-        handsize =hand.length;
+        handSize =hand.length;
         console.log(cards);
         handUpdate();
         updateUI("playing");
@@ -433,10 +433,10 @@ document.addEventListener("DOMContentLoaded", function () {
         div2.innerHTML = "<h2>Pioche</h2>";
 
         button.addEventListener("click", function ()  {
-            currentState="1";
-            var nbrCardPlayed = handsize-hand.length;
+            var nbrCardPlayed = handSize-hand.length;
             const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
             if (confirmation) {
+                currentState="1";
                 const gameId = localStorage.getItem("gameId");
                 localStorage.setItem("state", "0");
                 localStorage.setItem("Pseudos", "");
@@ -501,15 +501,10 @@ document.addEventListener("DOMContentLoaded", function () {
             footer.style.display = "flex";
             quit.style.display = "block";
             showOff.style.display = "inline-block";
-            if (endTurn){ endTurn.style.display = "block"}
+            if (endTurn) {
+                endTurn.style.display = "block"
+            }
             showHelp.style.display = "inline-block";
-        }else if (state === "ExitScreen") {
-            startDiv.style.display = "none";
-            joinDiv.style.display = "none";
-            boardDiv.style.display = "none";
-            footer.style.display = "none";
-            quit.style.display = "none";
-            messagesDiv.style.display = "block"; // Show scores or results here
         }// ajouter le state ExitScreen (page de score si win le score des joueurs si loose le score de cartes restantes)
     }
 
@@ -525,6 +520,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     socket.on("FailedPartie", (nbrNonPosedCard)=>{
+        console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        currentState="10";
         const messagesContainer = document.getElementById("received");
         var messageElement = document.createElement("div");
         messageElement.textContent = "Félicita... Ha non, vous n'avez pas réussi à batre leu jeu...";
@@ -539,15 +536,18 @@ document.addEventListener("DOMContentLoaded", function () {
             messageElement = document.createElement("div");
             messageElement.textContent = "On dirrait qu'on a des petits joueurs ici.";
             messagesContainer.appendChild(messageElement);
-
         }
-
+        Update();
+        updateUI("waiting");
     });
 
     socket.on("WinnedPartie", ()=>{
+        currentState="10";
         const messagesContainer = document.getElementById("received");
         const messageElement = document.createElement("div");
         messageElement.textContent = "Félicitation, Vous avez terminée votre partie et déposez toutes les cartes.";
         messagesContainer.appendChild(messageElement);
+        Update();
+        updateUI("waiting");
     });
 });

@@ -78,7 +78,8 @@ io.on("connection", (socket) => {
             deck: deck, // Remaining deck for the game
             cardPerPlayer :0,
             piles : [1,1,100,100],
-            playingOrder : []
+            playingOrder : [],
+            isPlaying :0
         };
 
         stock.games[key].players[userId] = {name : name, hand:[]}
@@ -107,15 +108,31 @@ io.on("connection", (socket) => {
     socket.on("EndTurn", () => {
         const gameKey = stock.player[userId];
         var maxCard= stock.games[gameKey].cardPerPlayer;
-        if((stock.games[gameKey].players[userId].hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && stock.games[gameKey].players[userId].hand.length > (maxCard-1))){
+        if((stock.games[gameKey].players[userId].hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && stock.games[gameKey].players[userId].hand.length > (maxCard-1))) {
             handleFailedPartie();
+        }
+        if (stock.games[gameKey].deck.length!==0) {
+            var gameEnded= false;
+            for (let keyPlayer in (stock.games[gameKey].players[userId].player)) {
+                if (stock.games[gameKey].players[userId].player[keyPlayer].hand.length > 0) {
+                    gameEnded=true;
+                    break;
+                }
+            }
+            if(gameEnded) {
+                handleWinnedPartie();
+            }
+
         }
         cardsToDeal = stock.games[gameKey].cardPerPlayer - stock.games[gameKey].players[userId].hand.length;
         dealCards(cardsToDeal, stock.games[gameKey].deck, stock.games[gameKey].players[userId], userId);
+        if (stock.games[stock.player[userId]].isPlaying === stock.games[stock.player[userId]].maxPlayers){
+            stock.games[stock.player[userId]].isPlaying = 0
+        }
+        io.to(stock.games[stock.player[userId]].playingOrder[stock.games[stock.player[userId]].isPlaying ++]).emit("startTurn");
         // verifie si la partie est gagné si elle est gagné affiche l'écran de win ? et permet de retourner au menu
         // ?? affichage d'un score (nombre de cartes posé ? points supplémentaire lors d'une serie de plus de n cartes dans le tour)
         // ??? logger le nombre de série obtenue par le joueurs / la longueur de la série
-        // passe le joueur suivant au state "1" et le joueur actuel au state "2"
     });
 
     socket.on("cardPlaced", (pile, value) => {
@@ -160,11 +177,17 @@ io.on("connection", (socket) => {
 
 
     function handleFailedPartie() {
-        // L passe les joueurs au statue ExitScreen avec affichage du score.
+        var gameKey = stock.player[userId];
+        var nbrNonPosedCard =stock.games[gameKey].deck.length;
+        for (let keyPlayer in (stock.games[gameKey].players[userId].player)) {
+            nbrNonPosedCard+=stock.games[gameKey].players[userId].player[keyPlayer].hand.length;
+        }
+        io.to(gameKey).emit("FailedPartie", nbrNonPosedCard);
     }
 
     function handleWinnedPartie() {
-        // L passe les joueurs au statue ExitScreen avec affichage du score.
+        var gameKey = stock.player[userId];
+        io.to(gameKey).emit("WinnedPartie");
     }
 
 
@@ -186,7 +209,7 @@ io.on("connection", (socket) => {
                 return;
             }
         }
-        io.to(stock.games[stock.player[userId]].playingOrder[0])("startTurn");
+        io.to(stock.games[stock.player[userId]].playingOrder[stock.games[stock.player[userId]].isPlaying++]).emit("startTurn");
     });
 });
 

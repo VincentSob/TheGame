@@ -84,12 +84,13 @@ document.addEventListener("DOMContentLoaded", function () {
     socket.on("cardDealed", (cards,nbrCarteRestante) => {
         console.log("cards : ",cards);
         console.log("hand : ",hand);
-        nbInPilesCard=nbrCarteRestante;
+        nbInDeckCard=nbrCarteRestante;
         hand = cards;
         hand.sort((a, b) => a - b);
         handsize =hand.length;
         console.log(cards);
-        Update();
+        handUpdate();
+        updateUI("playing");
 
     });
 
@@ -107,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         piles[pileId]=value;
         updateUI("playing");
+        Update();
     });
 
 
@@ -162,21 +164,69 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Handle game start event
-    socket.on("GameStarted", () => {
-        localStorage.setItem("state", "1");
-        //init
-        Update();
-        updateUI("playing");
+
+    socket.on("GameStarted", (nbrPlayers) => {
         console.log("The game has started!");
+
+        handUpdate();
+        updateUI("playing");
+        // Mettre à jour l'état dans localStorage
+        localStorage.setItem("state", "1");
+
+        // Mettre à jour l'interface utilisateur
+
+        // Cible l'élément où vous voulez insérer le formulaire
+        const boardDiv = document.getElementById("board");
+        if (!boardDiv) {
+            console.error("L'élément 'board' est introuvable dans le DOM.");
+            return;
+        }
+
+        // Sauvegarder l'état initial du contenu de la div
+        const previousContent = boardDiv.innerHTML;
+
+        // Nettoyer le contenu précédent
+        boardDiv.innerHTML = "";
+
+        // Créer un formulaire pour demander la position
+        const form = document.createElement("form");
+        form.id = "positionForm";
+        form.innerHTML = `
+        <label for="positionInput">Entrez la position où vous voulez jouer :</label>
+        <input type="number" id="positionInput" min="1" max="${nbrPlayers}" required>
+        <button type="submit">Confirmer</button>
+    `;
+
+        // Ajouter un gestionnaire d'événement pour le formulaire
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const positionInput = document.getElementById("positionInput");
+            const pos = parseInt(positionInput.value, 10);
+
+            if (isNaN(pos) || pos < 1 || pos > nbrPlayers) {
+                alert(`Veuillez entrer un numéro valide entre 1 et ${nbrPlayers}.`);
+                return;
+            }
+
+            // Envoyer la position au serveur
+            socket.emit("posAsk", pos);
+
+            // Restaurer le contenu précédent de la div après soumission
+            boardDiv.innerHTML = previousContent;
+            Update();
+        });
+
+        // Ajouter le formulaire à la div
+        boardDiv.appendChild(form);
     });
 
     function cardPlayed(pile,value){
-        if (pile>3 || pile<0 || value>=100 || value<=1){
+        if (pile>3 || pile<0 || value>=100 || value<=1 || currentState !="2"){
             updateUI("playing");
             return;
         }
-        socket.emit("cardPlaced", pile, value);
+        socket.emit("cardPlaced", pile, value)
     }
 
 
@@ -366,13 +416,13 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
-        const div = document.createElement("div");
-        div.classList.add("card");
-        div.setAttribute("draggable", "false"); // Les piles ne sont pas draggables
-
         const button = document.createElement("button");
-        button.className = "card-inner";
+        button.classList.add("card");
         button.setAttribute("id", 'btnEndTurn');
+        button.setAttribute("draggable", "false"); // Les piles ne sont pas draggables
+
+        const div = document.createElement("div");
+        div.className = "card-inner";
 
         const div1 = document.createElement("div");
         div1.className = "card-front";
@@ -383,6 +433,7 @@ document.addEventListener("DOMContentLoaded", function () {
         div2.innerHTML = "<h2>Pioche</h2>";
 
         button.addEventListener("click", function ()  {
+            currentState="1";
             var nbrCardPlayed = handsize-hand.length;
             const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
             if (confirmation) {
@@ -395,10 +446,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-        button.appendChild(div1);
-        button.appendChild(div2);
-        div.appendChild(button);
-        playingCardContainer.appendChild(div);
+        div.appendChild(div1);
+        div.appendChild(div2);
+        button.appendChild(div);
+        playingCardContainer.appendChild(button);
     }
 
     function Update() {
@@ -409,7 +460,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Function to update the UI based on the state
     function updateUI(state) {
-        Update()
         const startDiv = document.getElementById("start");
         const joinDiv = document.getElementById("join");
         const waitingDiv = document.getElementById("waitingScreen");
@@ -453,6 +503,13 @@ document.addEventListener("DOMContentLoaded", function () {
             showOff.style.display = "inline-block";
             if (endTurn){ endTurn.style.display = "block"}
             showHelp.style.display = "inline-block";
+        }else if (state === "ExitScreen") {
+            startDiv.style.display = "none";
+            joinDiv.style.display = "none";
+            boardDiv.style.display = "none";
+            footer.style.display = "none";
+            quit.style.display = "none";
+            messagesDiv.style.display = "block"; // Show scores or results here
         }// ajouter le state ExitScreen (page de score si win le score des joueurs si loose le score de cartes restantes)
     }
 
@@ -460,4 +517,37 @@ document.addEventListener("DOMContentLoaded", function () {
         updateUI(gameState); // Function to update the UI with the new state
     });
 
+    socket.on("startTurn", ()=>{
+        console.log(localStorage.getItem("Pseudos"));
+        localStorage.setItem("state", "2");
+        currentState = "2";
+    });
+
+
+    socket.on("FailedPartie", (nbrNonPosedCard)=>{
+        const messagesContainer = document.getElementById("received");
+        var messageElement = document.createElement("div");
+        messageElement.textContent = "Félicita... Ha non, vous n'avez pas réussi à batre leu jeu...";
+        messagesContainer.appendChild(messageElement);
+        messageElement = document.createElement("div");
+        messageElement.textContent = `Il vous restait ${nbrNonPosedCard} à poser.`;
+        messagesContainer.appendChild(messageElement);
+        if (nbrNonPosedCard>10){
+            messageElement = document.createElement("div");
+            messageElement.textContent = "On avais dit moins de 10 cartes pour que a soit 'un excellent résultat'.";
+            messagesContainer.appendChild(messageElement);
+            messageElement = document.createElement("div");
+            messageElement.textContent = "On dirrait qu'on a des petits joueurs ici.";
+            messagesContainer.appendChild(messageElement);
+
+        }
+
+    });
+
+    socket.on("WinnedPartie", ()=>{
+        const messagesContainer = document.getElementById("received");
+        const messageElement = document.createElement("div");
+        messageElement.textContent = "Félicitation, Vous avez terminée votre partie et déposez toutes les cartes.";
+        messagesContainer.appendChild(messageElement);
+    });
 });

@@ -28,7 +28,6 @@ io.on("connection", (socket) => {
         if (stock.games[key]) {
             stock.games[key].players[userId] = {name : name, hand: []};
             stock.player[userId] = key;
-            stock.piles = [1,1,100,100];
 
             socket.join(key);
             const playerCount = Object.keys(stock.games[key].players).length;
@@ -78,7 +77,8 @@ io.on("connection", (socket) => {
             maxPlayers: nbrPlayer,
             deck: deck, // Remaining deck for the game
             cardPerPlayer :0,
-            piles : [1,1,100,100]
+            piles : [1,1,100,100],
+            playingOrder : []
         };
 
         stock.games[key].players[userId] = {name : name, hand:[]}
@@ -95,7 +95,7 @@ io.on("connection", (socket) => {
                 stock.piles = [1, 1, 100, 100];
 
                 const playerCount = Object.keys(stock.games[key].players).length;
-                io.to(key).emit("GameStarted");
+                io.to(key).emit("GameStarted",nbrPlayer);
                 startingDealCards(stock.games[key].deck,1, userId); // 5 cards per player as an example
                 socket.emit("hasJoinGame", key, playerCount === stock.games[key].maxPlayers ? "1" : "10");
             }
@@ -112,15 +112,10 @@ io.on("connection", (socket) => {
         }
         cardsToDeal = stock.games[gameKey].cardPerPlayer - stock.games[gameKey].players[userId].hand.length;
         dealCards(cardsToDeal, stock.games[gameKey].deck, stock.games[gameKey].players[userId], userId);
-        //  partieContinue?
-        //    => cardsToDeal = games.game[key].cardPerPlayer - games.game[key].players[id].hand.length;
-        //    => dealCards(cardsToDeal, games.game[key].gameDeck, games.game[key].players[id]);
-        // permet de gerer la fin d'un tour avec verification si la partie est perdu ou si elle continue
-        // deal les nouvelles cartes avant de passer au joueur suivant
         // verifie si la partie est gagné si elle est gagné affiche l'écran de win ? et permet de retourner au menu
         // ?? affichage d'un score (nombre de cartes posé ? points supplémentaire lors d'une serie de plus de n cartes dans le tour)
         // ??? logger le nombre de série obtenue par le joueurs / la longueur de la série
-        // passe le joueur suivant au state playing et le joueur actuel au state waiting
+        // passe le joueur suivant au state "1" et le joueur actuel au state "2"
     });
 
     socket.on("cardPlaced", (pile, value) => {
@@ -172,6 +167,27 @@ io.on("connection", (socket) => {
         // L passe les joueurs au statue ExitScreen avec affichage du score.
     }
 
+
+    socket.on("posAsk", (pos) =>{
+        if (!stock.games[stock.player[userId]].playingOrder[pos-1]){
+            stock.games[stock.player[userId]].playingOrder[pos-1]=userId;
+            console.log(stock.games[stock.player[userId]].playingOrder);
+        }else{
+            var i=pos+1;
+            while (stock.games[stock.player[userId]].playingOrder[i%(stock.games[stock.player[userId]].maxPlayers-1)]){
+                i++;
+            }
+            stock.games[stock.player[userId]].playingOrder[i%(stock.games[stock.player[userId]].maxPlayers-1)]=userId;
+            console.log(stock.games[stock.player[userId]].playingOrder);
+        }
+
+        for (var j =0; j<stock.games[stock.player[userId]].maxPlayers ;j++){
+            if (!stock.games[stock.player[userId]].playingOrder[j]){
+                return;
+            }
+        }
+        io.to(stock.games[stock.player[userId]].playingOrder[0])("startTurn");
+    });
 });
 
 // Helper functions
@@ -214,7 +230,7 @@ function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
     for (const cardsKey in cards) {
         stock.games[stock.player[userId]].players[userId].hand.push(cards[cardsKey])
     }
-    io.to(userId).emit("cardDealed", (stock.games[stock.player[userId]].players[userId].hand),gameDeck.length);
+    io.to(userId).emit("cardDealed", (stock.games[stock.player[userId]].players[userId].hand),gameDeck.length+1);
 
 }
 

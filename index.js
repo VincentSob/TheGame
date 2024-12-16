@@ -19,13 +19,16 @@ server.listen(3000, () => {
 });
 
 io.on("connection", (socket) => {
-    const userId = socket.id;
+    const userId = socket.id
+    console.log("Nouveau joueur connecté :", userId);
+    socket.emit("yourSocketId", userId); // Envoi de l'ID au client
 
     // Handle joining a game
     socket.on("JoinGame", (key, name) => {
         if (game.games[key]) {
             game.games[key].players[userId] = {name : name, hand: []};
             game.player[userId] = key;
+            game.piles = [1,1,100,100];
 
             socket.join(key);
             const playerCount = Object.keys(game.games[key].players).length;
@@ -69,7 +72,8 @@ io.on("connection", (socket) => {
             players:[],
             maxPlayers: nbrPlayer,
             deck: deck, // Remaining deck for the game
-            cardPerPlayer :0
+            cardPerPlayer :0,
+            piles : [1,1,100,100]
         };
 
         game.games[key].players[userId] = {name : name, hand:[]}
@@ -105,13 +109,44 @@ io.on("connection", (socket) => {
         // ??? logger le nombre de série obtenue par le joueurs / la longueur de la série
         // passe le joueur suivant au state playing et le joueur actuel au state waiting
     });
-    
-    socket.on("cardPlaced", () => {
-        // verifie la validité du move si move invalide (carte modifié en inspecter l'élément ou autre envoyer un message d'erreur à la source)
-        // si erreur emit("invalidMoveDone")
-        // si move valide emit("CardPlayed") et mise a jours de la main du joueur;
-        
+
+    socket.on("cardPlaced", (pile, value) => {
+        const gameKey = game.player[userId];
+
+        if (!gameKey || !game.games[gameKey] || !game.games[gameKey].players[userId]) {
+            console.error("Invalid game state or user ID.");
+            return;
+        }
+
+        const player = game.games[gameKey].players[userId];
+        const curentHand = player.hand;
+
+        // Check if the card exists in the player's hand
+        if (!curentHand.includes(value)) {
+            socket.emit("invalidMoveDone", game.games[gameKey].piles,  curentHand)
+            return;
+        }
+        console.log( game.games[gameKey]);
+        const pileValue = game.games[gameKey].piles[pile];
+        const isValidMove =
+            (pile === 0 || pile === 1) ? (pileValue < value || pileValue - 10 === value) :
+                (pile === 2 || pile === 3) ? (pileValue > value || pileValue + 10 === value) :
+                    false;
+
+        if (isValidMove) {
+            // Emit valid move event
+            io.to(gameKey).emit("cardPlayed", userId, value, pile);
+
+            // Update pile and player's hand
+            game.games[gameKey].piles[pile] = value;
+            const cardIndex = curentHand.indexOf(value);
+            if (cardIndex > -1) curentHand.splice(cardIndex, 1);
+        } else {
+            // Emit invalid move event
+            socket.emit("invalidMoveDone", game.games[gameKey].piles, curentHand)
+        }
     });
+
 
     function handleFailedPartie() {
         // L passe les joueurs au statue ExitScreen avec affichage du score.

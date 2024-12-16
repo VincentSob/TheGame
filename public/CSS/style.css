@@ -30,8 +30,8 @@ b, u, i, center,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
   margin: 0;
@@ -42,7 +42,7 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, 
+article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
   display: block;
 }
@@ -131,182 +131,182 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
                                                                       p:::::::p
                                                                       ppppppppp
 */
-  @media (min-width: 1200px) {
-    h1{
-      font-size: xx-large;
-      width: fit-content;
-      margin: 2.75% auto;
-    }
-
-    html {
-      background-color:  var(--background-color);
-    }
-    #board{
-      display: none;
-    }
-
-    #menu{
-      margin: auto auto;
-      width: fit-content;
-      display: block;
-
-    }
-
-    h2{
-      margin: 2.5% auto;
-      width: fit-content;
-    }
-
-    button{
-      margin: 5% auto;
-      display: inline-block;
-    }
-
-    menu label, menu input{
-      margin: auto auto;
-      width: fit-content;
-
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    #board .card {
-      background-color: transparent;
-      width: 220px;
-      height: 300px;
-      border: 0.1rem solid var(--border-color);
-      perspective: 1000px;
-    }
-
-    .card {
-      font-size: 150%;
-      background-color: transparent;
-      width: 190px;
-      height: 259px;
-      border: 0.1rem solid var(--border-color);
-      perspective: 1000px;
-      margin-bottom: 1%;
-    }
-
-    .card-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      text-align: center;
-      transition: transform 0.5s;
-      transform-style: preserve-3d;
-    }
-
-    #board .playingCard .card:hover .card-inner {
-      transform: rotateY(180deg);
-    }
-
-    .card-front, .card-front-ascendant, .card-front-descendant,
-    .card-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-    }
-
-    .card-front {
-      color: white;
-      background:var(--background-card-color);
-    }
-
-    .card-back {
-      transform: rotateY(180deg);
-      background:var(--background-card-color);
-      background-repeat: no-repeat;
-      background-position: center;
-    }
-
-    .card-back h2 {
-      margin: 15% auto;
-      font-size: 200%;
-      font-weight: bold;
-    }
-
-    .card-front h2 {
-      margin: 50% auto;
-      font-size: 200%;
-      font-weight: bold;
-    }
-
-    .card-front-ascendant h2, .card-front-descendant h2 {
-      margin: 40% auto;
-      font-size: 200%;
-      font-weight: bold;
-    }
-
-    .card-front-ascendant, .card-front-descendant {
-      color: white;
-      background: no-repeat;
-      background:var(--background-card-color);
-      background-size: contain;
-      background-position: center;
-    }
-
-    #board .playingCard {
-      justify-content: space-between;
-      display: flex;
-      align-items: center;
-
-    }
-
-    footer {
-      position: sticky;
-      bottom: 0;
-      margin: -0.25% 15%;
-      display: none;
-    }
-
-    #waitingScreen {
-      display: none;
-    }
-
-    #messages {
-      position: fixed; /* parent relativement positionné */
-      height: auto;
-      width: 25%; /* largeur fixe du conteneur */
-      display: none;
-      top: 10%;
-      bottom: 10%;
-      right: 10%;
-    }
-
-    #messages > #received{
-      top: 0;
-      position: fixed; /* élément positionné absolument */
-      width: 100%; /* largeur fixe de l'élément */
-      background-color: #f0f0f0; /* couleur de fond */
-    }
-
-    #messages > #toSend{
-      bottom: 0;
-      position: fixed; /* élément positionné absolument */
-      width: 100%; /* largeur fixe de l'élément */
-      background-color: #f0f0f0; /* couleur de fond */
-    }
-
-    footer .card:hover {
-      transform: translateY(-10%);
-    }
-
-    #btnShowOff {
-      display: flex;
-      position: sticky;
-      bottom: 0;
-      color: var(--font-color);
-      border-radius: 2%;
-      background-image: var(--background-card-color);
-      float: right;
-    }
-    #btnShowOff:hover {
-      content: "Cliquer pour cacher votre main";
-    }
+@media (min-width: 1200px) {
+  h1{
+    font-size: xx-large;
+    width: fit-content;
+    margin: 2.75% auto;
   }
+
+  html {
+    background-color:  var(--background-color);
+  }
+  #board{
+    display: none;
+  }
+
+  #menu{
+    margin: auto auto;
+    width: fit-content;
+    display: block;
+
+  }
+
+  h2{
+    margin: 2.5% auto;
+    width: fit-content;
+  }
+
+  button{
+    margin: 5% auto;
+    display: flex;
+  }
+
+  menu label, menu input{
+    margin: auto auto;
+    width: fit-content;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  #board .card {
+    background-color: transparent;
+    width: 220px;
+    height: 300px;
+    border: 0.1rem solid var(--border-color);
+    perspective: 1000px;
+  }
+
+  .card {
+    font-size: 150%;
+    background-color: transparent;
+    width: 190px;
+    height: 259px;
+    border: 0.1rem solid var(--border-color);
+    perspective: 1000px;
+    margin-bottom: 1%;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+  }
+
+  #board .playingCard .card:hover .card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-front, .card-front-ascendant, .card-front-descendant,
+  .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+  }
+
+  .card-front {
+    color: white;
+    background:var(--background-card-color);
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+    background:var(--background-card-color);
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .card-back h2 {
+    margin: 15% auto;
+    font-size: 200%;
+    font-weight: bold;
+  }
+
+  .card-front h2 {
+    margin: 50% auto;
+    font-size: 200%;
+    font-weight: bold;
+  }
+
+  .card-front-ascendant h2, .card-front-descendant h2 {
+    margin: 40% auto;
+    font-size: 200%;
+    font-weight: bold;
+  }
+
+  .card-front-ascendant, .card-front-descendant {
+    color: white;
+    background: no-repeat;
+    background:var(--background-card-color);
+    background-size: contain;
+    background-position: center;
+  }
+
+  #board .playingCard {
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+
+  }
+
+  footer {
+    position: sticky;
+    bottom: 0;
+    margin: -0.25% 15%;
+    display: none;
+  }
+
+  #waitingScreen {
+    display: none;
+  }
+
+  #messages {
+    position: fixed; /* parent relativement positionné */
+    height: auto;
+    width: 25%; /* largeur fixe du conteneur */
+    display: none;
+    top: 10%;
+    bottom: 10%;
+    right: 10%;
+  }
+
+  #messages > #received{
+    top: 0;
+    position: fixed; /* élément positionné absolument */
+    width: 100%; /* largeur fixe de l'élément */
+    background-color: #f0f0f0; /* couleur de fond */
+  }
+
+  #messages > #toSend{
+    bottom: 0;
+    position: fixed; /* élément positionné absolument */
+    width: 100%; /* largeur fixe de l'élément */
+    background-color: #f0f0f0; /* couleur de fond */
+  }
+
+  footer .card:hover {
+    transform: translateY(-10%);
+  }
+
+  #btnShowOff {
+    display: flex;
+    position: sticky;
+    bottom: 0;
+    color: var(--font-color);
+    border-radius: 2%;
+    background-image: var(--background-card-color);
+    float: right;
+  }
+  #btnShowOff:hover {
+    content: "Cliquer pour cacher votre main";
+  }
+}
 
 /**
      999999999          999999999      222222222222222

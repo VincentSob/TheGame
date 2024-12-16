@@ -79,8 +79,6 @@ io.on("connection", (socket) => {
         stock.games[key].players[userId] = {name : name, hand:[]}
         stock.player[userId] = key;
 
-
-
         socket.join(key);
 
         if (nbrPlayer === 1) {
@@ -95,10 +93,12 @@ io.on("connection", (socket) => {
 
     socket.on("EndTurn", () => {
         const gameKey = stock.player[userId];
-        var maxCard=  (stock.games[gameKey].maxPlayers ===2 )? 7:6;
-        if((stock.games[gameKey].players.hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && games.game[gameKey].players.hand.length > (maxCard-1))){
+        var maxCard= stock.games[gameKey].cardPerPlayer;
+        if((stock.games[gameKey].players[userId].hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && stock.games[gameKey].players[userId].hand.length > (maxCard-1))){
             handleFailedPartie();
         }
+        cardsToDeal = stock.games[gameKey].cardPerPlayer - stock.games[gameKey].players[userId].hand.length;
+        dealCards(cardsToDeal, stock.games[gameKey].deck, stock.games[gameKey].players[userId], userId);
         //  partieContinue?
         //    => cardsToDeal = games.game[key].cardPerPlayer - games.game[key].players[id].hand.length;
         //    => dealCards(cardsToDeal, games.game[key].gameDeck, games.game[key].players[id]);
@@ -184,6 +184,7 @@ function startingDealCards (gameDeck, nbrPlayer,userId) {
     var playerKeys = stock.games[gameKey].players.entries();
     for (var [key, value] of Object.entries(stock.games[gameKey].players)) {
         var currentPlayer=stock.games[gameKey].players[key];
+        stock.games[stock.player[userId]].players[userId].hand=[];
         dealCards(cardToDeal, gameDeck, currentPlayer,key)
     }
     stock.games[gameKey].cardPerPlayer = cardToDeal;
@@ -197,10 +198,10 @@ function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
         cards.push(gameDeck.shift());
         i++;
     }
-
-    currentPlayer.hand= cards;
-    stock.games[stock.player[userId]].players[userId].hand =cards;
-    io.to(userId).emit("cardDealed", (cards));
+    for (const cardsKey in cards) {
+        stock.games[stock.player[userId]].players[userId].hand.push(cards[cardsKey])
+    }
+    io.to(userId).emit("cardDealed", (stock.games[stock.player[userId]].players[userId].hand));
 
 }
 

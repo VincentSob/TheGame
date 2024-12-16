@@ -14,8 +14,8 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + "/Public/HTML/theGame.html");
 });
 
-server.listen(3000, () => {
-    console.log("Server is running on port 3000");
+server.listen(8080, () => {
+    console.log("Server is running on port 8080");
 });
 
 io.on("connection", (socket) => {
@@ -97,7 +97,7 @@ io.on("connection", (socket) => {
         const gameKey = game.player[userId];
         //partieFailed?=
         if(game[gameKey].players.hand.length > (nbrPlayer-2)){
-         handleFailedPartie();
+            handleFailedPartie();
         }
         //  partieContinue?
         //    => cardsToDeal = games.game[key].cardPerPlayer - games.game[key].players[id].hand.length;
@@ -111,15 +111,16 @@ io.on("connection", (socket) => {
     });
 
     socket.on("cardPlaced", (pile, value) => {
-        const gameKey = game.player[userId];
+        var gameKey = game.player[userId];
+        console.log(game.games[gameKey]);
 
         if (!gameKey || !game.games[gameKey] || !game.games[gameKey].players[userId]) {
             console.error("Invalid game state or user ID.");
             return;
         }
 
-        const player = game.games[gameKey].players[userId];
-        const curentHand = player.hand;
+        var player = game.games[gameKey].players[userId];
+        var curentHand = player.hand;
 
         // Check if the card exists in the player's hand
         if (!curentHand.includes(value)) {
@@ -127,24 +128,26 @@ io.on("connection", (socket) => {
             return;
         }
         console.log( game.games[gameKey]);
-        const pileValue = game.games[gameKey].piles[pile];
-        const isValidMove =
-            (pile === 0 || pile === 1) ? (pileValue < value || pileValue - 10 === value) :
-                (pile === 2 || pile === 3) ? (pileValue > value || pileValue + 10 === value) :
-                    false;
+        var pileValue = game.games[gameKey].piles[pile];
+        console.log(pileValue - 10, pileValue + 10);
+        console.log("pile : ",pile, "value",game.games[gameKey].piles[pile]);
 
-        if (isValidMove) {
+        if (((pile === 0 || pile === 1) && (pileValue < value || pileValue - 10 === value))||
+            ((pile === 2 || pile === 3) && (pileValue > value || pileValue + 10 === value)) ) {
             // Emit valid move event
             io.to(gameKey).emit("cardPlayed", userId, value, pile);
 
             // Update pile and player's hand
             game.games[gameKey].piles[pile] = value;
-            const cardIndex = curentHand.indexOf(value);
+            var cardIndex = curentHand.indexOf(value);
+            console.log("pile : ",pile, "value",game.games[gameKey].piles[pile]);
             if (cardIndex > -1) curentHand.splice(cardIndex, 1);
+            console.log( game.games[gameKey]);
         } else {
             // Emit invalid move event
             socket.emit("invalidMoveDone", game.games[gameKey].piles, curentHand)
         }
+        io.to(gameKey).emit("gameStateUpdate","playing");
     });
 
 

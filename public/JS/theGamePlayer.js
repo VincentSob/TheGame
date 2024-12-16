@@ -2,14 +2,19 @@
 var hand = [];
 var piles =[1,1,100,100];
 
-document.addEventListener(D)
 document.addEventListener("DOMContentLoaded", function () {
+
     // Initialize localStorage variables
     if (!localStorage.getItem("Pseudos")) localStorage.setItem("Pseudos", "");
     if (!localStorage.getItem("state")) localStorage.setItem("state", "0");
     if (!localStorage.getItem("gameId")) localStorage.setItem("gameId", "");
 
-    const socket = io.connect();
+    var socket = io.connect();
+
+    socket.on("yourSocketId", (id) => {
+        console.log("Votre socket ID reçu du serveur :", id);
+        localStorage.setItem("id",id);
+    });
 
     // Get initial state
     let currentState = localStorage.getItem("state");
@@ -80,11 +85,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     });
 
-    socket.on("invalidMoveDone", () => {
-        console.log("Merci d\'annuler le dernier move");
+    socket.on("invalidMoveDone", (resendPiles, resendHand) => {
+        piles=resendPiles;
+        hand=resendHand;
+        updateUI("playing");
     });
 
-    socket.on("cardPlayed", () => {
+    socket.on("cardPlayed", (playerId, value, pileId) => {
+        console.log("value :"+value+ "played on pile : "+pileId+'\n');
+        if(playerId === localStorage.getItem("id")){
+            const cardIndex = hand.indexOf(value);
+            if (cardIndex > -1) hand.splice(cardIndex, 1);
+        }
+        piles[pileId]=value;
+        updateUI("playing");
         // affiche la carte joué par le joueurs si la source est différente du joueur actuel
         // si la carte est joué par le joueur actuel remove la carte du tableau playerHand
         //if (actual == emmiter) {
@@ -155,240 +169,254 @@ document.addEventListener("DOMContentLoaded", function () {
         updateUI("playing");
         console.log("The game has started!");
     });
-});
 
-function moveCard(e) {
-    e.dataTransfer.effectAllowed = "move";
-    e.target.classList.add(".dragging"); // Add a visual cue for the dragged card
-    e.dataTransfer.setData("text/plain", e); // Set card's HTML as data
-}
+    function cardPlayed(pile,value){
+        if (pile>3 || pile<0 || value>=100 || value<=1){
+            updateUI("playing");
+            return;
+        }
+        socket.emit("cardPlaced", pile, value);
+    }
+
+
+    function moveCard(e) {
+        e.dataTransfer.effectAllowed = "move";
+        e.target.classList.add(".dragging"); // Add a visual cue for the dragged card
+        e.dataTransfer.setData("text/plain", e); // Set card's HTML as data
+    }
 
 // Allows dragging over a valid target
-function overMoveCard(e) {
-    e.preventDefault(); // Prevent default to allow dropping
-    e.dataTransfer.dropEffect = "move";
-}
+    function overMoveCard(e) {
+        e.preventDefault(); // Prevent default to allow dropping
+        e.dataTransfer.dropEffect = "move";
+    }
 
 // Handles the drop event to append the card to the target container
 // Démarre le drag
-function handleDragStart(e) {
-    const card = e.target.closest(".card");
-    if (!card) {
-        console.error("L'élément sélectionné n'est pas une carte valide.");
-        return;
-    }
-
-    const cardValue = card.querySelector(".card-front h2").textContent.trim();
-    e.dataTransfer.setData("text/plain", cardValue); // Stocke uniquement la valeur de la carte
-    e.dataTransfer.effectAllowed = "move"; // Définit l'effet du drag
-    console.log("Drag started with card value:", cardValue);
-}
-
-// Gère le drop
-function dropCard(event) {
-    event.preventDefault(); // Empêche le comportement par défaut
-
-    const draggedValue = parseInt(event.dataTransfer.getData("text/plain"), 10); // Valeur de la carte
-    const dropZone = event.currentTarget; // Zone où la carte est déposée
-    const dropZoneValue = parseInt(dropZone.querySelector(".card-front h2").innerText, 10);
-
-    if (isNaN(draggedValue) || isNaN(dropZoneValue)) {
-        console.error("Valeur invalide détectée.");
-        return;
-    }
-
-    const pileIndex = Array.from(dropZone.parentElement.children).indexOf(dropZone);
-    // Valide le mouvement
-    if (( (pileIndex== 2 || pileIndex==3) && draggedValue < dropZoneValue && dropZoneValue <= 100) ||
-        ( (pileIndex== 1 || pileIndex==0) && draggedValue > dropZoneValue && dropZoneValue >= 1)) {
-        // Met à jour la pile
-        piles[pileIndex] = draggedValue;
-
-        // Retire la carte de la main
-        const handIndex = hand.indexOf(draggedValue);
-        if (handIndex !== -1) {
-            hand.splice(handIndex, 1); // Supprime la carte de la main
+    function handleDragStart(e) {
+        const card = e.target.closest(".card");
+        if (!card) {
+            console.error("L'élément sélectionné n'est pas une carte valide.");
+            return;
         }
 
-        // Met à jour l'interface
-        updateUI("playing");
-        console.log("Carte déplacée avec succès !");
-    } else {
-        console.log("Mouvement invalide !");
+        const cardValue = card.querySelector(".card-front h2").textContent.trim();
+        e.dataTransfer.setData("text/plain", cardValue); // Stocke uniquement la valeur de la carte
+        e.dataTransfer.effectAllowed = "move"; // Définit l'effet du drag
+        console.log("Drag started with card value:", cardValue);
     }
-}
+
+// Gère le drop
+    function dropCard(event) {
+        event.preventDefault(); // Empêche le comportement par défaut
+
+        const draggedValue = parseInt(event.dataTransfer.getData("text/plain"), 10); // Valeur de la carte
+        const dropZone = event.currentTarget; // Zone où la carte est déposée
+        const dropZoneValue = parseInt(dropZone.querySelector(".card-front h2").innerText, 10);
+
+        if (isNaN(draggedValue) || isNaN(dropZoneValue)) {
+            console.error("Valeur invalide détectée.");
+            return;
+        }
+
+        const pileIndex = Array.from(dropZone.parentElement.children).indexOf(dropZone);
+        // Valide le mouvement
+        if (( (pileIndex== 2 || pileIndex==3) && (draggedValue < dropZoneValue || draggedValue == dropZoneValue+10)  && dropZoneValue <= 100) ||
+            ( (pileIndex== 1 || pileIndex==0) && (draggedValue > dropZoneValue || draggedValue == dropZoneValue-10) && dropZoneValue >= 1)) {
+            // Met à jour la pile
+            piles[pileIndex] = draggedValue;
+
+            // Retire la carte de la main
+            const handIndex = hand.indexOf(draggedValue);
+            if (handIndex !== -1) {
+                hand.splice(handIndex, 1); // Supprime la carte de la main
+            }
+
+            // Met à jour l'interface
+            cardPlayed(pileIndex,draggedValue);
+            console.log("Carte déplacée avec succès !");
+        } else {
+            console.log("Mouvement invalide !");
+        }
+    }
 
 
 // Fin du drag
-function handleDragEnd(e) {
-}
-
-
-function handUpdate() {
-    // Check if 'hand' is defined
-    if (typeof hand !== "object" || hand === null) {
-        console.error("The 'hand' object is not defined or is invalid.");
-        return;
+    function handleDragEnd(e) {
     }
 
-    // Remove the existing footer
-    var footer = document.querySelector("footer");
-    if (footer) footer.remove();
 
-    // Create a new footer element
-    footer = document.createElement("footer");
-
-    // Create a container div with a draggable attribute
-
-    // Iterate through the hand object and populate cards
-    for (var handKey in hand) {
-        if (hand.hasOwnProperty(handKey)) {
-
-            var div = document.createElement("div");
-            div.className = "card";
-            div.setAttribute("draggable", "true");
-            div.addEventListener("dragstart",function (e){handleDragStart(e)});
-            div.addEventListener("dragend", function (e){handleDragEnd(e)});
-
-            console.log(handKey);
-
-            var div1 = document.createElement("div");
-            div1.className = "card-inner";
-
-            var div2 = document.createElement("div");
-            div2.className = "card-front";
-            div2.innerHTML = `<h2>${hand[handKey]}</h2>`; // Correct string interpolation
-
-            var div3 = document.createElement("div");
-            div3.className = "card-back"; // Changed class name for clarity
-            div3.innerHTML = `<h2>The Game</h2>`;
-
-            div1.appendChild(div2);
-            div1.appendChild(div3);
-            div.appendChild(div1);
-
-
-            // Append the new structure to the footer and then to the body
-            footer.appendChild(div);
+    function handUpdate() {
+        // Check if 'hand' is defined
+        if (typeof hand !== "object" || hand === null) {
+            console.error("The 'hand' object is not defined or is invalid.");
+            return;
         }
-    }
 
-    document.body.appendChild(footer);
-}
-function pilesUpdate() {
-    console.log("updatePiles");
-    const HTMLpiles = document.createElement("div");
-    HTMLpiles.className = "playingCard";
+        // Remove the existing footer
+        var footer = document.querySelector("footer");
+        if (footer) footer.remove();
 
-    const playingCardContainer = document.querySelector(".playingCard");
-    if (playingCardContainer) {
-        playingCardContainer.innerHTML = ""; // Nettoie les anciennes cartes
-    }
-    for (const pilesKey in piles) {
-        if (piles.hasOwnProperty(pilesKey)) {
+        // Create a new footer element
+        footer = document.createElement("footer");
 
-            const div = document.createElement("div");
-            div.classList.add("card");
-            div.setAttribute("draggable", "false"); // Les piles ne sont pas draggables
+        // Create a container div with a draggable attribute
 
-            // Ajout des événements de drag and drop
-            div.addEventListener("dragover", function (event) {
-                event.preventDefault(); // Autorise le drop
-                event.dataTransfer.dropEffect = "move";
-            });
+        // Iterate through the hand object and populate cards
+        for (var handKey in hand) {
+            if (hand.hasOwnProperty(handKey)) {
 
-            div.addEventListener("drop", function (event) {
-                console.log("Carte déposée !");
-                dropCard(event); // Gère l'événement de dépôt
-            });
+                var div = document.createElement("div");
+                div.className = "card";
+                div.setAttribute("draggable", "true");
+                div.addEventListener("dragstart",function (e){handleDragStart(e)});
+                div.addEventListener("dragend", function (e){handleDragEnd(e)});
 
-            div.addEventListener("dragenter", (event) => {
-                event.preventDefault(); // Permet le survol
-                div.style.backgroundColor = "lightgray"; // Indication visuelle
-            });
+                console.log(handKey);
 
-            div.addEventListener("dragleave", () => {
-                div.style.backgroundColor = ""; // Réinitialise l'indication visuelle
-            });
+                var div1 = document.createElement("div");
+                div1.className = "card-inner";
 
-            const div1 = document.createElement("div");
-            div1.className = "card-inner";
+                var div2 = document.createElement("div");
+                div2.className = "card-front";
+                div2.innerHTML = `<h2>${hand[handKey]}</h2>`; // Correct string interpolation
 
-            const div2 = document.createElement("div");
-            div2.className = "card-front";
-            div2.innerHTML = `<h2>${piles[pilesKey]}</h2>`; // Correct string interpolation
+                var div3 = document.createElement("div");
+                div3.className = "card-back"; // Changed class name for clarity
+                div3.innerHTML = `<h2>The Game</h2>`;
 
-            const div3 = document.createElement("div");
-            div3.className = "card-back";
+                div1.appendChild(div2);
+                div1.appendChild(div3);
+                div.appendChild(div1);
 
-            if (pilesKey == 0 || pilesKey == 1) {
-                if (piles[pilesKey] > 10) {
-                    div3.innerHTML = `<h2>${piles[pilesKey]} to 100</h2><h2>OR</h2><h2>${piles[pilesKey] - 10}</h2>`;
-                } else {
-                    div3.innerHTML = `<h2>${piles[pilesKey]} to 100</h2>`;
-                }
-            } else {
-                if (piles[pilesKey] < 90) {
-                    div3.innerHTML = `<h2>${piles[pilesKey]} to 1</h2><h2>OR</h2><h2>${piles[pilesKey] + 10}</h2>`;
-                } else {
-                    div3.innerHTML = `<h2>${piles[pilesKey]} to 1</h2>`;
-                }
+
+                // Append the new structure to the footer and then to the body
+                footer.appendChild(div);
             }
-
-            div1.appendChild(div2);
-            div1.appendChild(div3);
-            div.appendChild(div1);
-
-            playingCardContainer.appendChild(div);
         }
+
+        document.body.appendChild(footer);
+    }
+    function pilesUpdate() {
+        console.log("updatePiles");
+        const HTMLpiles = document.createElement("div");
+        HTMLpiles.className = "playingCard";
+
+        const playingCardContainer = document.querySelector(".playingCard");
+        if (playingCardContainer) {
+            playingCardContainer.innerHTML = ""; // Nettoie les anciennes cartes
+        }
+        for (const pilesKey in piles) {
+            if (piles.hasOwnProperty(pilesKey)) {
+
+                const div = document.createElement("div");
+                div.classList.add("card");
+                div.setAttribute("draggable", "false"); // Les piles ne sont pas draggables
+
+                // Ajout des événements de drag and drop
+                div.addEventListener("dragover", function (event) {
+                    event.preventDefault(); // Autorise le drop
+                    event.dataTransfer.dropEffect = "move";
+                });
+
+                div.addEventListener("drop", function (event) {
+                    console.log("Carte déposée !");
+                    dropCard(event); // Gère l'événement de dépôt
+                });
+
+                div.addEventListener("dragenter", (event) => {
+                    event.preventDefault(); // Permet le survol
+                    div.style.backgroundColor = "lightgray"; // Indication visuelle
+                });
+
+                div.addEventListener("dragleave", () => {
+                    div.style.backgroundColor = ""; // Réinitialise l'indication visuelle
+                });
+
+                const div1 = document.createElement("div");
+                div1.className = "card-inner";
+
+                const div2 = document.createElement("div");
+                div2.className = "card-front";
+                div2.innerHTML = `<h2>${piles[pilesKey]}</h2>`; // Correct string interpolation
+
+                const div3 = document.createElement("div");
+                div3.className = "card-back";
+
+                if (pilesKey == 0 || pilesKey == 1) {
+                    if (piles[pilesKey] > 10) {
+                        div3.innerHTML = `<h2>${piles[pilesKey]} to 100</h2><h2>OR</h2><h2>${piles[pilesKey] - 10}</h2>`;
+                    } else {
+                        div3.innerHTML = `<h2>${piles[pilesKey]} to 100</h2>`;
+                    }
+                } else {
+                    if (piles[pilesKey] < 90) {
+                        div3.innerHTML = `<h2>${piles[pilesKey]} to 1</h2><h2>OR</h2><h2>${piles[pilesKey] + 10}</h2>`;
+                    } else {
+                        div3.innerHTML = `<h2>${piles[pilesKey]} to 1</h2>`;
+                    }
+                }
+
+                div1.appendChild(div2);
+                div1.appendChild(div3);
+                div.appendChild(div1);
+
+                playingCardContainer.appendChild(div);
+            }
+        }
+
     }
 
-}
-
-function Update() {
-    handUpdate();
-    pilesUpdate();
-}
+    function Update() {
+        handUpdate();
+        pilesUpdate();
+    }
 
 
 // Function to update the UI based on the state
-function updateUI(state) {
-    const startDiv = document.getElementById("start");
-    const joinDiv = document.getElementById("join");
-    const waitingDiv = document.getElementById("waitingScreen");
-    const messagesDiv = document.getElementById("messages");
-    const boardDiv = document.getElementById("board");
-    const footer = document.querySelector("footer");
-    const quit = document.getElementById("btnQuitGame");
-    const showOff = document.getElementById("btnShowOff");
+    function updateUI(state) {
+        const startDiv = document.getElementById("start");
+        const joinDiv = document.getElementById("join");
+        const waitingDiv = document.getElementById("waitingScreen");
+        const messagesDiv = document.getElementById("messages");
+        const boardDiv = document.getElementById("board");
+        const footer = document.querySelector("footer");
+        const quit = document.getElementById("btnQuitGame");
+        const showOff = document.getElementById("btnShowOff");
 
-    if (state === "start") {
-        startDiv.style.display = "block";
-        joinDiv.style.display = "block";
-        waitingDiv.style.display = "none";
-        messagesDiv.style.display = "none";
-        boardDiv.style.display = "none";
-        footer.style.display = "none";
-        quit.style.display = "none";
-        showOff.style.display = "none";
-    } else if (state === "waiting") {
-        startDiv.style.display = "none";
-        joinDiv.style.display = "none";
-        waitingDiv.style.display = "block";
-        messagesDiv.style.display = "block";
-        boardDiv.style.display = "none";
-        footer.style.display = "none";
-        quit.style.display = "block";
-        showOff.style.display = "none";
-    } else if (state === "playing") {
-        Update()
-        startDiv.style.display = "none";
-        joinDiv.style.display = "none";
-        waitingDiv.style.display = "none";
-        messagesDiv.style.display = "none";
-        boardDiv.style.display = "block";
-        footer.style.display = "flex";
-        quit.style.display = "block";
-        showOff.style.display = "inline-block";
-    }// ajouter le state ExitScreen (page de score si win le score des joueurs si loose le score de cartes restantes)
-}
+        if (state === "start") {
+            startDiv.style.display = "block";
+            joinDiv.style.display = "block";
+            waitingDiv.style.display = "none";
+            messagesDiv.style.display = "none";
+            boardDiv.style.display = "none";
+            footer.style.display = "none";
+            quit.style.display = "none";
+            showOff.style.display = "none";
+        } else if (state === "waiting") {
+            startDiv.style.display = "none";
+            joinDiv.style.display = "none";
+            waitingDiv.style.display = "block";
+            messagesDiv.style.display = "block";
+            boardDiv.style.display = "none";
+            footer.style.display = "none";
+            quit.style.display = "block";
+            showOff.style.display = "none";
+        } else if (state === "playing") {
+            Update()
+            startDiv.style.display = "none";
+            joinDiv.style.display = "none";
+            waitingDiv.style.display = "none";
+            messagesDiv.style.display = "none";
+            boardDiv.style.display = "block";
+            footer.style.display = "flex";
+            quit.style.display = "block";
+            showOff.style.display = "inline-block";
+        }// ajouter le state ExitScreen (page de score si win le score des joueurs si loose le score de cartes restantes)
+    }
+
+    socket.on("gameStateUpdate", (gameState) => {
+        updateUI(gameState); // Function to update the UI with the new state
+    });
+
+});

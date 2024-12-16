@@ -110,6 +110,7 @@ io.on("connection", (socket) => {
         var maxCard= stock.games[gameKey].cardPerPlayer;
         if((stock.games[gameKey].players[userId].hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && stock.games[gameKey].players[userId].hand.length > (maxCard-1))) {
             handleFailedPartie();
+            return;
         }
         if (stock.games[gameKey].deck.length!==0) {
             var gameEnded= false;
@@ -121,6 +122,7 @@ io.on("connection", (socket) => {
             }
             if(gameEnded) {
                 handleWinnedPartie();
+                return;
             }
 
         }

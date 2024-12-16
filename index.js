@@ -64,6 +64,11 @@ io.on("connection", (socket) => {
     });
 
     socket.on("NewGame", (nbrPlayer, name) => {
+
+        if (nbrPlayer <1 || nbrPlayer> 5){
+            return;
+        }
+
         const key = generateUniqueGameKey(userId);
         const deck = generateDeck(); // Create and shuffle a deck
 
@@ -81,11 +86,19 @@ io.on("connection", (socket) => {
 
         socket.join(key);
 
-        if (nbrPlayer === 1) {
-            socket.emit("hasJoinGame", key, "1");
-            io.to(key).emit("GameStarted"); // Send hand to the player
-        } else {
+        if (nbrPlayer !== 1) {
             socket.emit("hasJoinGame", key, "10");
+        } else {
+            if (stock.games[key]) {
+                stock.games[key].players[userId] = {name: name, hand: []};
+                stock.player[userId] = key;
+                stock.piles = [1, 1, 100, 100];
+
+                const playerCount = Object.keys(stock.games[key].players).length;
+                io.to(key).emit("GameStarted");
+                startingDealCards(stock.games[key].deck,1, userId); // 5 cards per player as an example
+                socket.emit("hasJoinGame", key, playerCount === stock.games[key].maxPlayers ? "1" : "10");
+            }
         }
 
         io.to(key).emit("receivedMessage", `${name} created the game: ${key}`);
@@ -180,7 +193,7 @@ function generateDeck () {
 
 function startingDealCards (gameDeck, nbrPlayer,userId) {
     const gameKey = stock.player[userId];
-    var cardToDeal = (stock.games[gameKey].maxPlayers ===2 )? 7:6;
+    var cardToDeal = (stock.games[gameKey].maxPlayers ===2 )? 7:(stock.games[gameKey].maxPlayers ===1 )? 8: 6;
     var playerKeys = stock.games[gameKey].players.entries();
     for (var [key, value] of Object.entries(stock.games[gameKey].players)) {
         var currentPlayer=stock.games[gameKey].players[key];
@@ -201,7 +214,7 @@ function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
     for (const cardsKey in cards) {
         stock.games[stock.player[userId]].players[userId].hand.push(cards[cardsKey])
     }
-    io.to(userId).emit("cardDealed", (stock.games[stock.player[userId]].players[userId].hand));
+    io.to(userId).emit("cardDealed", (stock.games[stock.player[userId]].players[userId].hand),gameDeck.length);
 
 }
 

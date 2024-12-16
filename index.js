@@ -3,7 +3,7 @@ const app = express();
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 
-var game = {
+var stock = {
     player: {},
     games: {},
 };
@@ -25,18 +25,18 @@ io.on("connection", (socket) => {
 
     // Handle joining a game
     socket.on("JoinGame", (key, name) => {
-        if (game.games[key]) {
-            game.games[key].players[userId] = {name : name, hand: []};
-            game.player[userId] = key;
-            game.piles = [1,1,100,100];
+        if (stock.games[key]) {
+            stock.games[key].players[userId] = {name : name, hand: []};
+            stock.player[userId] = key;
+            stock.piles = [1,1,100,100];
 
             socket.join(key);
-            const playerCount = Object.keys(game.games[key].players).length;
-            if (playerCount === game.games[key].maxPlayers) {
+            const playerCount = Object.keys(stock.games[key].players).length;
+            if (playerCount === stock.games[key].maxPlayers) {
                 io.to(key).emit("GameStarted");
-                startingDealCards(game.games[key].deck, game.games[key].maxPlayers,userId); // 5 cards per player as an example
+                startingDealCards(stock.games[key].deck, stock.games[key].maxPlayers,userId); // 5 cards per player as an example
             }
-            socket.emit("hasJoinGame", key, playerCount === game.games[key].maxPlayers ? "1" : "10");
+            socket.emit("hasJoinGame", key, playerCount === stock.games[key].maxPlayers ? "1" : "10");
         } else {
             socket.emit("error", "Game not found");
         }
@@ -44,21 +44,21 @@ io.on("connection", (socket) => {
 
     // Handle sending messages
     socket.on("sendMessage", (message) => {
-        const gameKey = game.player[userId];
+        const gameKey = stock.player[userId];
         if (gameKey) {
             io.to(gameKey).emit(
                 "receivedMessage",
-                `${game.games[gameKey].players[userId].name}: ${message}`
+                `${stock.games[gameKey].players[userId].name}: ${message}`
             );
         }
     });
 
     // Handle player disconnection
     socket.on("disconnect", () => {
-        const gameKey = game.player[userId];
-        if (gameKey && game.games[gameKey]) {
-            delete game.games[gameKey].players[userId];
-            delete game.player[userId];
+        const gameKey = stock.player[userId];
+        if (gameKey && stock.games[gameKey]) {
+            delete stock.games[gameKey].players[userId];
+            delete stock.player[userId];
         }
         // ajouter un message d'alerte aux autres joueurs de la partie et les renvoyé au menu
     });
@@ -68,7 +68,7 @@ io.on("connection", (socket) => {
         const deck = generateDeck(); // Create and shuffle a deck
 
 
-        game.games[key] = {
+        stock.games[key] = {
             players:[],
             maxPlayers: nbrPlayer,
             deck: deck, // Remaining deck for the game
@@ -76,8 +76,8 @@ io.on("connection", (socket) => {
             piles : [1,1,100,100]
         };
 
-        game.games[key].players[userId] = {name : name, hand:[]}
-        game.player[userId] = key;
+        stock.games[key].players[userId] = {name : name, hand:[]}
+        stock.player[userId] = key;
 
 
 
@@ -93,10 +93,10 @@ io.on("connection", (socket) => {
         io.to(key).emit("receivedMessage", `${name} created the game: ${key}`);
     });
 
-    socket.on("EndTurn", (nbrPlayer) => {
-        const gameKey = game.player[userId];
-        //partieFailed?=
-        if(game[gameKey].players.hand.length > (nbrPlayer-2)){
+    socket.on("EndTurn", () => {
+        const gameKey = stock.player[userId];
+        var maxCard=  (stock.games[gameKey].maxPlayers ===2 )? 7:6;
+        if((stock.games[gameKey].players.hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && games.game[gameKey].players.hand.length > (maxCard-1))){
             handleFailedPartie();
         }
         //  partieContinue?
@@ -111,26 +111,26 @@ io.on("connection", (socket) => {
     });
 
     socket.on("cardPlaced", (pile, value) => {
-        var gameKey = game.player[userId];
-        console.log(game.games[gameKey]);
+        var gameKey = stock.player[userId];
+        console.log(stock.games[gameKey]);
 
-        if (!gameKey || !game.games[gameKey] || !game.games[gameKey].players[userId]) {
+        if (!gameKey || !stock.games[gameKey] || !stock.games[gameKey].players[userId]) {
             console.error("Invalid game state or user ID.");
             return;
         }
 
-        var player = game.games[gameKey].players[userId];
+        var player = stock.games[gameKey].players[userId];
         var curentHand = player.hand;
 
         // Check if the card exists in the player's hand
         if (!curentHand.includes(value)) {
-            socket.emit("invalidMoveDone", game.games[gameKey].piles,  curentHand)
+            socket.emit("invalidMoveDone", stock.games[gameKey].piles,  curentHand)
             return;
         }
-        console.log( game.games[gameKey]);
-        var pileValue = game.games[gameKey].piles[pile];
+        console.log( stock.games[gameKey]);
+        var pileValue = stock.games[gameKey].piles[pile];
         console.log(pileValue - 10, pileValue + 10);
-        console.log("pile : ",pile, "value",game.games[gameKey].piles[pile]);
+        console.log("pile : ",pile, "value",stock.games[gameKey].piles[pile]);
 
         if (((pile === 0 || pile === 1) && (pileValue < value || pileValue - 10 === value))||
             ((pile === 2 || pile === 3) && (pileValue > value || pileValue + 10 === value)) ) {
@@ -138,14 +138,14 @@ io.on("connection", (socket) => {
             io.to(gameKey).emit("cardPlayed", userId, value, pile);
 
             // Update pile and player's hand
-            game.games[gameKey].piles[pile] = value;
+            stock.games[gameKey].piles[pile] = value;
             var cardIndex = curentHand.indexOf(value);
-            console.log("pile : ",pile, "value",game.games[gameKey].piles[pile]);
+            console.log("pile : ",pile, "value",stock.games[gameKey].piles[pile]);
             if (cardIndex > -1) curentHand.splice(cardIndex, 1);
-            console.log( game.games[gameKey]);
+            console.log( stock.games[gameKey]);
         } else {
             // Emit invalid move event
-            socket.emit("invalidMoveDone", game.games[gameKey].piles, curentHand)
+            socket.emit("invalidMoveDone", stock.games[gameKey].piles, curentHand)
         }
         io.to(gameKey).emit("gameStateUpdate","playing");
     });
@@ -164,7 +164,7 @@ io.on("connection", (socket) => {
 // Helper functions
 function generateUniqueGameKey(userId) {
     var key = reduceRandomString(userId, 6);
-    return game.games[key] ? generateUniqueGameKey(userId) : key;
+    return stock.games[key] ? generateUniqueGameKey(userId) : key;
 }
 
 function reduceRandomString(original, newLength) {
@@ -179,15 +179,14 @@ function generateDeck () {
 }
 
 function startingDealCards (gameDeck, nbrPlayer,userId) {
-    const gameKey = game.player[userId];
-    var cardToDeal;
-    (nbrPlayer === 2)? cardToDeal=7 : (nbrPlayer === 3 || nbrPlayer===4)? cardToDeal=6 :cardToDeal= 5;
-    var playerKeys = game.games[gameKey].players.entries();
-    for (var [key, value] of Object.entries(game.games[gameKey].players)) {
-        var currentPlayer=game.games[gameKey].players[key];
+    const gameKey = stock.player[userId];
+    var cardToDeal = (stock.games[gameKey].maxPlayers ===2 )? 7:6;
+    var playerKeys = stock.games[gameKey].players.entries();
+    for (var [key, value] of Object.entries(stock.games[gameKey].players)) {
+        var currentPlayer=stock.games[gameKey].players[key];
         dealCards(cardToDeal, gameDeck, currentPlayer,key)
     }
-    game.games[gameKey].cardPerPlayer = cardToDeal;
+    stock.games[gameKey].cardPerPlayer = cardToDeal;
 }
 
 function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
@@ -200,7 +199,7 @@ function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
     }
 
     currentPlayer.hand= cards;
-    game.games[game.player[userId]].players[userId].hand =cards;
+    stock.games[stock.player[userId]].players[userId].hand =cards;
     io.to(userId).emit("cardDealed", (cards));
 
 }

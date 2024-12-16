@@ -1,0 +1,12 @@
+{
+  "name": "sobritz_game",
+  "version": "1.0.0",
+  "description": "The game web version",
+  "main": "index.js",
+  "author": "SOBRITZ Cincent",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1",
+    "socket.io": "^4.8.1"
+  }
+}

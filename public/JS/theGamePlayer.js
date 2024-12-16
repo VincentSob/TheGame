@@ -2,6 +2,7 @@
 var hand = [];
 var piles =[1,1,100,100];
 var handsize=0;
+var nbInDeckCard = 99;
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -47,21 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    const endTurn = document.getElementById("btnEndTurn");
-    if (endTurn){
-        endTurn.addEventListener("click", function ()  {
-            var nbrCardPlayed = handsize-hand.length;
-            const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
-            if (confirmation) {
-                const gameId = localStorage.getItem("gameId");
-                localStorage.setItem("state", "0");
-                localStorage.setItem("Pseudos", "");
-                localStorage.setItem("gameId", "");
 
-                socket.emit("EndTurn");
-            }
-        });
-    }
 
     // Join Game button functionality
     const joinButton = document.getElementById("rejoindrePartie");
@@ -94,9 +81,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ajouter un socket.on "cardDealed" =>
-    socket.on("cardDealed", (cards) => {
+    socket.on("cardDealed", (cards,nbrCarteRestante) => {
         console.log("cards : ",cards);
         console.log("hand : ",hand);
+        nbInPilesCard=nbrCarteRestante;
         hand = cards;
         hand.sort((a, b) => a - b);
         handsize =hand.length;
@@ -119,13 +107,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         piles[pileId]=value;
         updateUI("playing");
-        // affiche la carte joué par le joueurs si la source est différente du joueur actuel
-        // si la carte est joué par le joueur actuel remove la carte du tableau playerHand
-        //if (actual == emmiter) {
-        // needed ?? => a mettre dans invalid move done
-        //} else {
-        //  diplayPlayedCard();
-        // }
     });
 
 
@@ -385,16 +366,50 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        const div = document.createElement("div");
+        div.classList.add("card");
+        div.setAttribute("draggable", "false"); // Les piles ne sont pas draggables
+
+        const button = document.createElement("button");
+        button.className = "card-inner";
+        button.setAttribute("id", 'btnEndTurn');
+
+        const div1 = document.createElement("div");
+        div1.className = "card-front";
+        div1.innerHTML = `<h2>${nbInDeckCard}</h2>`;
+
+        const div2 = document.createElement("div");
+        div2.className = "card-back";
+        div2.innerHTML = "<h2>Pioche</h2>";
+
+        button.addEventListener("click", function ()  {
+            var nbrCardPlayed = handsize-hand.length;
+            const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
+            if (confirmation) {
+                const gameId = localStorage.getItem("gameId");
+                localStorage.setItem("state", "0");
+                localStorage.setItem("Pseudos", "");
+                localStorage.setItem("gameId", "");
+
+                socket.emit("EndTurn");
+            }
+        });
+
+        button.appendChild(div1);
+        button.appendChild(div2);
+        div.appendChild(button);
+        playingCardContainer.appendChild(div);
     }
 
     function Update() {
-        handUpdate();
         pilesUpdate();
+        handUpdate();
     }
 
 
 // Function to update the UI based on the state
     function updateUI(state) {
+        Update()
         const startDiv = document.getElementById("start");
         const joinDiv = document.getElementById("join");
         const waitingDiv = document.getElementById("waitingScreen");
@@ -405,7 +420,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const showOff = document.getElementById("btnShowOff");
         const endTurn = document.getElementById("btnEndTurn");
         const showHelp = document.getElementById("btnShowHelp");
-
         if (state === "start") {
             startDiv.style.display = "block";
             joinDiv.style.display = "block";
@@ -415,7 +429,7 @@ document.addEventListener("DOMContentLoaded", function () {
             footer.style.display = "none";
             quit.style.display = "none";
             showOff.style.display = "none";
-            endTurn.style.display = "none";
+            if (endTurn){ endTurn.style.display = "none"}
             showHelp.style.display = "none";
         } else if (state === "waiting") {
             startDiv.style.display = "none";
@@ -426,10 +440,9 @@ document.addEventListener("DOMContentLoaded", function () {
             footer.style.display = "none";
             quit.style.display = "block";
             showOff.style.display = "none";
-            endTurn.style.display = "none";
+            if (endTurn){ endTurn.style.display = "none"}
             showHelp.style.display = "none";
         } else if (state === "playing") {
-            Update()
             startDiv.style.display = "none";
             joinDiv.style.display = "none";
             waitingDiv.style.display = "none";
@@ -438,7 +451,7 @@ document.addEventListener("DOMContentLoaded", function () {
             footer.style.display = "flex";
             quit.style.display = "block";
             showOff.style.display = "inline-block";
-            endTurn.style.display = "flex";
+            if (endTurn){ endTurn.style.display = "block"}
             showHelp.style.display = "inline-block";
         }// ajouter le state ExitScreen (page de score si win le score des joueurs si loose le score de cartes restantes)
     }

@@ -162,6 +162,11 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     display: flex;
   }
 
+  btnEndTurn{
+    margin: auto auto;
+    display: block;
+  }
+
   menu label, menu input{
     margin: auto auto;
     width: fit-content;
@@ -190,6 +195,8 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
   }
 
   .card-inner {
+    border: none;
+    margin: 0;
     position: relative;
     width: 100%;
     height: 100%;
@@ -202,9 +209,10 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     transform: rotateY(180deg);
   }
 
-  .card-front, .card-front-ascendant, .card-front-descendant,
-  .card-back {
+  .card-front, .card-back {
     position: absolute;
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
@@ -232,20 +240,6 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     margin: 50% auto;
     font-size: 200%;
     font-weight: bold;
-  }
-
-  .card-front-ascendant h2, .card-front-descendant h2 {
-    margin: 40% auto;
-    font-size: 200%;
-    font-weight: bold;
-  }
-
-  .card-front-ascendant, .card-front-descendant {
-    color: white;
-    background: no-repeat;
-    background:var(--background-card-color);
-    background-size: contain;
-    background-position: center;
   }
 
   #board .playingCard {

@@ -1,12 +1,13 @@
 
 var hand = [];
 var piles =[1,1,100,100];
+var handsize=0;
 
 document.addEventListener("DOMContentLoaded", function () {
 
     // Initialize localStorage variables
     if (!localStorage.getItem("Pseudos")) localStorage.setItem("Pseudos", "");
-    if (!localStorage.getItem("state")) localStorage.setItem("state", "0");
+    if (!localStorage.getItem("state")) localStorage.setItem("state", "0"); // state "10" = waiting, "0" = menu, other : game started
     if (!localStorage.getItem("gameId")) localStorage.setItem("gameId", "");
 
     var socket = io.connect();
@@ -20,9 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentState = localStorage.getItem("state");
     console.log("Current state:", currentState); // Debugging
 
-    // Ensure valid state
-    const validStates = ["0", "10", "1"];
-    if (!validStates.includes(currentState)) {
+
+    if (currentState != null) {
         localStorage.setItem("state", "0");
         currentState = "0";
     }
@@ -44,6 +44,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
             localStorage.setItem("Pseudos", playerName);
             socket.emit("NewGame", nbrPlayers, playerName);
+        });
+    }
+
+    const endTurn = document.getElementById("btnEndTurn");
+    if (endTurn){
+        endTurn.addEventListener("click", function ()  {
+            var nbrCardPlayed = handsize-hand.length;
+            const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
+            if (confirmation) {
+                const gameId = localStorage.getItem("gameId");
+                localStorage.setItem("state", "0");
+                localStorage.setItem("Pseudos", "");
+                localStorage.setItem("gameId", "");
+
+                socket.emit("EndTurn");
+            }
         });
     }
 
@@ -79,7 +95,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ajouter un socket.on "cardDealed" =>
     socket.on("cardDealed", (cards) => {
+        console.log("cards : ",cards);
+        console.log("hand : ",hand);
         hand = cards;
+        hand.sort((a, b) => a - b);
+        handsize =hand.length;
         console.log(cards);
         Update();
 
@@ -383,6 +403,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const footer = document.querySelector("footer");
         const quit = document.getElementById("btnQuitGame");
         const showOff = document.getElementById("btnShowOff");
+        const endTurn = document.getElementById("btnEndTurn");
+        const showHelp = document.getElementById("btnShowHelp");
 
         if (state === "start") {
             startDiv.style.display = "block";
@@ -393,6 +415,8 @@ document.addEventListener("DOMContentLoaded", function () {
             footer.style.display = "none";
             quit.style.display = "none";
             showOff.style.display = "none";
+            endTurn.style.display = "none";
+            showHelp.style.display = "none";
         } else if (state === "waiting") {
             startDiv.style.display = "none";
             joinDiv.style.display = "none";
@@ -402,6 +426,8 @@ document.addEventListener("DOMContentLoaded", function () {
             footer.style.display = "none";
             quit.style.display = "block";
             showOff.style.display = "none";
+            endTurn.style.display = "none";
+            showHelp.style.display = "none";
         } else if (state === "playing") {
             Update()
             startDiv.style.display = "none";
@@ -412,6 +438,8 @@ document.addEventListener("DOMContentLoaded", function () {
             footer.style.display = "flex";
             quit.style.display = "block";
             showOff.style.display = "inline-block";
+            endTurn.style.display = "flex";
+            showHelp.style.display = "inline-block";
         }// ajouter le state ExitScreen (page de score si win le score des joueurs si loose le score de cartes restantes)
     }
 

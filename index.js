@@ -201,11 +201,11 @@ io.on("connection", (socket) => {
             stock.games[stock.player[userId]].playingOrder[pos-1]=userId;
             console.log(stock.games[stock.player[userId]].playingOrder);
         }else{
-            var i=pos+1;
-            while (stock.games[stock.player[userId]].playingOrder[i%(stock.games[stock.player[userId]].maxPlayers-1)]){
+            var i=pos;
+            while (stock.games[stock.player[userId]].playingOrder[i%(stock.games[stock.player[userId]].maxPlayers)]){
                 i++;
             }
-            stock.games[stock.player[userId]].playingOrder[i%(stock.games[stock.player[userId]].maxPlayers-1)]=userId;
+            stock.games[stock.player[userId]].playingOrder[i%(stock.games[stock.player[userId]].maxPlayers)]=userId;
             console.log(stock.games[stock.player[userId]].playingOrder);
         }
 

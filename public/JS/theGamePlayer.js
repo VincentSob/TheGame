@@ -4,7 +4,47 @@ var piles =[1,1,100,100];
 var handSize=0;
 var nbInDeckCard = 99;
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {var key68 = false;
+    var keyShift = false;
+
+    document.addEventListener('keydown', function(event) {
+        console.log(event.key);
+        if (event.key === "Shift") {
+            keyShift = true;
+        }
+        if (event.key === "d" || event.key === "D") {
+            key68 = true;
+        }
+
+        if (keyShift && key68) {
+            // Sélectionner tous les éléments ayant la classe "lightMode"
+            var lightModeElements = document.querySelectorAll(".lightMode");
+
+            // Si des éléments "lightMode" existent, on les remplace par "darkMode"
+            if (lightModeElements.length > 0) {
+                lightModeElements.forEach(function(element) {
+                    element.classList.remove("lightMode");
+                    element.classList.add("darkMode");
+                });
+            } else {
+                // Sinon, on remplace les éléments "darkMode" par "lightMode"
+                var darkModeElements = document.querySelectorAll(".darkMode");
+                darkModeElements.forEach(function(element) {
+                    element.classList.remove("darkMode");
+                    element.classList.add("lightMode");
+                });
+            }
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        if (event.key === "Shift") {
+            keyShift = false;
+        }
+        if (event.key === "d" || event.key === "D") {
+            key68 = false;
+        }
+    });
 
     // Initialize localStorage variables
     if (!localStorage.getItem("Pseudos")) localStorage.setItem("Pseudos", "");
@@ -433,16 +473,21 @@ document.addEventListener("DOMContentLoaded", function () {
         div2.innerHTML = "<h2>Pioche</h2>";
 
         button.addEventListener("click", function ()  {
-            var nbrCardPlayed = handSize-hand.length;
-            const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
-            if (confirmation) {
-                currentState="1";
-                const gameId = localStorage.getItem("gameId");
-                localStorage.setItem("state", "0");
-                localStorage.setItem("Pseudos", "");
-                localStorage.setItem("gameId", "");
+            if (currentState == "2") {
+                const turn = document.getElementById("turn");
+                if (turn){turn.style.display = "none";}
 
-                socket.emit("EndTurn");
+                var nbrCardPlayed = handSize - hand.length;
+                const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
+                if (confirmation) {
+                    currentState = "1";
+                    const gameId = localStorage.getItem("gameId");
+                    localStorage.setItem("state", "0");
+                    localStorage.setItem("Pseudos", "");
+                    localStorage.setItem("gameId", "");
+
+                    socket.emit("EndTurn");
+                }
             }
         });
 
@@ -513,6 +558,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     socket.on("startTurn", ()=>{
+        const turn = document.getElementById("turn");
+        if (turn){turn.style.display = "block";}
         console.log(localStorage.getItem("Pseudos"));
         localStorage.setItem("state", "2");
         currentState = "2";

@@ -141,6 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
     });
 
     socket.on("cardPlayed", (playerId, value, pileId) => {
+
+        speak(`carte ${value} jouer sur la pile n°${pileId}`);
         console.log("value :"+value+ "played on pile : "+pileId+'\n');
         if(playerId === localStorage.getItem("id")){
             const cardIndex = hand.indexOf(value);
@@ -327,6 +329,8 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
             cardPlayed(pileIndex,draggedValue);
             console.log("Carte déplacée avec succès !");
         } else {
+            var order = (pileIndex== 2 || pileIndex==3)? "montante" :" descendante";
+            speak(`Vraiment, Vous essayer de poser un ${draggedValue} sur un ${dropZoneValue} sur un pile ${order}. Il faut réfléchir un peu`)
             console.log("Mouvement invalide !");
         }
     }
@@ -371,7 +375,6 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
                 var div2 = document.createElement("div");
                 div2.className = "card-front";
                 div2.innerHTML = `<h2>${hand[handKey]}</h2>`; // Correct string interpolation
-
                 var div3 = document.createElement("div");
                 div3.className = "card-back"; // Changed class name for clarity
                 div3.innerHTML = `<h2>The Game</h2>`;
@@ -430,7 +433,6 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
                 const div2 = document.createElement("div");
                 div2.className = "card-front";
                 div2.innerHTML = `<h2>${piles[pilesKey]}</h2>`; // Correct string interpolation
-
                 const div3 = document.createElement("div");
                 div3.className = "card-back";
 
@@ -474,18 +476,20 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
 
         button.addEventListener("click", function ()  {
             if (currentState == "2") {
-                const turn = document.getElementById("turn");
-                if (turn){turn.style.display = "none";}
+                speechSynthesis.cancel();
 
                 var nbrCardPlayed = handSize - hand.length;
                 const confirmation = confirm(`Vous avez jouez ${nbrCardPlayed} durant se tour, voulez vous finir votre tour`);
                 if (confirmation) {
+
+                    const turn = document.getElementById("turn");
+                    if (turn){turn.style.display = "none";}
                     currentState = "1";
                     const gameId = localStorage.getItem("gameId");
                     localStorage.setItem("state", "0");
                     localStorage.setItem("Pseudos", "");
                     localStorage.setItem("gameId", "");
-
+                    speak("fin de votre tour")
                     socket.emit("EndTurn");
                 }
             }
@@ -563,6 +567,7 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
         console.log(localStorage.getItem("Pseudos"));
         localStorage.setItem("state", "2");
         currentState = "2";
+        speak("Début de votre tour");
     });
 
 
@@ -572,16 +577,20 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
         const messagesContainer = document.getElementById("received");
         var messageElement = document.createElement("div");
         messageElement.textContent = "Félicita... Ha non, vous n'avez pas réussi à batre leu jeu...";
+        speak("Félicita... Ha non, vous n'avez pas réussi à batre leu jeu...");
         messagesContainer.appendChild(messageElement);
         messageElement = document.createElement("div");
         messageElement.textContent = `Il vous restait ${nbrNonPosedCard} à poser.`;
+        speak(`Il vous restait ${nbrNonPosedCard} à poser.`);
         messagesContainer.appendChild(messageElement);
         if (nbrNonPosedCard>10){
             messageElement = document.createElement("div");
             messageElement.textContent = "On avais dit moins de 10 cartes pour que a soit 'un excellent résultat'.";
+            speak("On avais dit moins de 10 cartes pour que a soit 'un excellent résultat'.");
             messagesContainer.appendChild(messageElement);
             messageElement = document.createElement("div");
             messageElement.textContent = "On dirrait qu'on a des petits joueurs ici.";
+            speak("On dirrait qu'on a des petits joueurs ici.");
             messagesContainer.appendChild(messageElement);
         }
         Update();
@@ -593,8 +602,20 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
         const messagesContainer = document.getElementById("received");
         const messageElement = document.createElement("div");
         messageElement.textContent = "Félicitation, Vous avez terminée votre partie et déposez toutes les cartes.";
+        speak("Félicitation, Vous avez terminée votre partie et déposez toutes les cartes.");
         messagesContainer.appendChild(messageElement);
         Update();
         updateUI("waiting");
     });
 });
+
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'fr-FR'; // Langue française
+        utterance.rate = 3; // Vitesse normale
+        window.speechSynthesis.speak(utterance);
+    } else {
+        alert("La synthèse vocale n'est pas supportée par ce navigateur.");
+    }
+}

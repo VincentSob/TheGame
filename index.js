@@ -79,7 +79,8 @@ io.on("connection", (socket) => {
             cardPerPlayer :0,
             piles : [1,1,100,100],
             playingOrder : [],
-            isPlaying :0
+            isPlaying :0,
+            cardPlayed:0
         };
 
         stock.games[key].players[userId] = {name : name, hand:[]}
@@ -108,10 +109,11 @@ io.on("connection", (socket) => {
     socket.on("EndTurn", () => {
         const gameKey = stock.player[userId];
         var maxCard= stock.games[gameKey].cardPerPlayer;
-        if((stock.games[gameKey].players[userId].hand.length > (maxCard-2) && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 && stock.games[gameKey].players[userId].hand.length > (maxCard-1))) { //TODO
+        if((stock.games[gameKey].cardPlayed<2 && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 &&  stock.games[gameKey].cardPlayed<1)) {
             handleFailedPartie();
             return;
         }
+        stock.games[gameKey].cardPlayed=0;
         if (stock.games[gameKey].deck.length!==0) {
             var gameEnded= false;
             for (let keyPlayer in (stock.games[gameKey].players[userId].player)) {
@@ -162,8 +164,9 @@ io.on("connection", (socket) => {
         if (((pile === 0 || pile === 1) && (pileValue < value || pileValue - 10 === value))||
             ((pile === 2 || pile === 3) && (pileValue > value || pileValue + 10 === value)) ) {
             // Emit valid move event
-            io.to(gameKey).emit("cardPlayed", userId, value, pile);
 
+            io.to(gameKey).emit("cardPlayed", userId, value, pile);
+            stock.games[gameKey].cardPlayed++;
             // Update pile and player's hand
             stock.games[gameKey].piles[pile] = value;
             var cardIndex = curentHand.indexOf(value);

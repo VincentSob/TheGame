@@ -109,6 +109,7 @@ io.on("connection", (socket) => {
     socket.on("EndTurn", () => {
         const gameKey = stock.player[userId];
         var maxCard= stock.games[gameKey].cardPerPlayer;
+        var maxCard= stock.games[gameKey].cardPerPlayer;
         if((stock.games[gameKey].cardPlayed<2 && stock.games[gameKey].deck.length!==0) || (stock.games[gameKey].deck.length===0 &&  stock.games[gameKey].cardPlayed<1)) {
             handleFailedPartie();
             return;
@@ -259,6 +260,7 @@ function dealCards(cardToDeal, gameDeck, currentPlayer,userId) {
         stock.games[stock.player[userId]].players[userId].hand.push(cards[cardsKey])
     }
     io.to(userId).emit("cardDealed", (stock.games[stock.player[userId]].players[userId].hand),gameDeck.length+1);
+    io.to(stock.player[userId]).emit("cardLeft",gameDeck.length);
 
 }
 

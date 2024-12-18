@@ -115,9 +115,9 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
         updateUI(state === "10" ? "waiting" : "playing");
 
         const waitingDiv = document.getElementById("waitingScreen");
-        waitingDiv.innerHTML = `<p>Welcome ${localStorage.getItem("Pseudos")}</p>
-                                <p>Waiting for game to start...</p>
-                                <p>You have joined Game ID: ${key}</p>`;
+        waitingDiv.innerHTML = `<p>Bienvenue ${localStorage.getItem("Pseudos")}</p>
+                                <p>En attente de démarage de la partie...</p>
+                                <p>Vous avez rejoin la partie ${key}</p>`;
     });
 
     // ajouter un socket.on "cardDealed" =>
@@ -438,15 +438,15 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
 
                 if (pilesKey == 0 || pilesKey == 1) {
                     if (piles[pilesKey] > 10) {
-                        div3.innerHTML = `<h2>${piles[pilesKey]} to 100</h2><h2>OR</h2><h2>${piles[pilesKey] - 10}</h2>`;
+                        div3.innerHTML = `<h2> de ${piles[pilesKey]} à 100</h2><h2>OU</h2><h2>${piles[pilesKey] - 10}</h2>`;
                     } else {
-                        div3.innerHTML = `<h2>${piles[pilesKey]} to 100</h2>`;
+                        div3.innerHTML = `<h2> de ${piles[pilesKey]} à 100</h2>`;
                     }
                 } else {
                     if (piles[pilesKey] < 90) {
-                        div3.innerHTML = `<h2>${piles[pilesKey]} to 1</h2><h2>OR</h2><h2>${piles[pilesKey] + 10}</h2>`;
+                        div3.innerHTML = `<h2> de ${piles[pilesKey]} à 1</h2><h2>OU</h2><h2>${piles[pilesKey] + 10}</h2>`;
                     } else {
-                        div3.innerHTML = `<h2>${piles[pilesKey]} to 1</h2>`;
+                        div3.innerHTML = `<h2> de ${piles[pilesKey]} à 1</h2>`;
                     }
                 }
 
@@ -468,7 +468,7 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
 
         const div1 = document.createElement("div");
         div1.className = "card-front";
-        div1.innerHTML = `<h2>${nbInDeckCard}</h2>`;
+        div1.innerHTML = `<h2>${nbInDeckCard} cartes restantes</h2>`;
 
         const div2 = document.createElement("div");
         div2.className = "card-back";
@@ -606,6 +606,12 @@ document.addEventListener("DOMContentLoaded", function () {var key68 = false;
         messagesContainer.appendChild(messageElement);
         Update();
         updateUI("waiting");
+    });
+
+
+    socket.on("cardLeft", (value) => {
+        nbInDeckCard=value;
+        console.log(value);
     });
 });
 

@@ -116,6 +116,7 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
 
   html {
     background-color:  var(--background-color);
+    color: var(--font-color);
   }
 
   #board{
@@ -138,15 +139,19 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     margin: 5% auto;
     display: flex;
     background-color:  var(--background-color);
+    color: var(--font-color);
   }
   label{
     background-color:  var(--background-color);
+    color: var(--font-color);
   }
   input{
     background-color:  var(--background-color);
+    color: var(--font-color);
   }
   div{
     background-color:  var(--background-color);
+    color: var(--font-color);
   }
 
   #btnEndTurn{
@@ -168,6 +173,9 @@ MMMMMMMM               MMMMMMMM   ooooooooooo     nnnnnn    nnnnnn             C
     align-items: center;
   }
 
+  #sendMessage{
+    display: inline;
+  }
   #board .card {
     background-color: transparent;
     width: 220px;

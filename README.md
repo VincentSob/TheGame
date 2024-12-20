@@ -1,7 +1,10 @@
 # TheGame
 Ce projet à été effectuer dans le cadre de mon parcours universitaire (L3 en 2024-2025)
+
 Un jeu étais a choisir parmis 2 : 
+
 Yokai : un jeu coopératif dans lequel les joueurs doivent, avec des moyens de communication limités, regrouper des membres de chacune des 4 familles de Yokai en déplaçant des cartes les représentant.
+
 The Game : un jeu coopératif dans lequel les joueurs doivent empiler toutes les cartes numérotées en les répartissant sur 4 tas pour lesquels un ordre croissant ou décroissant d'empilement est exigé.
 
 Je me suis tourné sur le jeu The Game

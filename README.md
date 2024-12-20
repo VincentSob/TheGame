@@ -1,11 +1,13 @@
-# TheGame
+TheGame
+
+
 Ce projet à été effectuer dans le cadre de mon parcours universitaire (L3 en 2024-2025)
 
 Un jeu étais a choisir parmis 2 : 
 
-Yokai : un jeu coopératif dans lequel les joueurs doivent, avec des moyens de communication limités, regrouper des membres de chacune des 4 familles de Yokai en déplaçant des cartes les représentant.
+	Yokai : un jeu coopératif dans lequel les joueurs doivent, avec des moyens de communication limités, regrouper des membres de chacune des 4 familles de Yokai en déplaçant des cartes les représentant.
 
-The Game : un jeu coopératif dans lequel les joueurs doivent empiler toutes les cartes numérotées en les répartissant sur 4 tas pour lesquels un ordre croissant ou décroissant d'empilement est exigé.
+	The Game : un jeu coopératif dans lequel les joueurs doivent empiler toutes les cartes numérotées en les répartissant sur 4 tas pour lesquels un ordre croissant ou décroissant d'empilement est exigé.
 
 Je me suis tourné sur le jeu The Game
 
@@ -23,7 +25,7 @@ Les fonctionnalités attendues pour le projet sont les suivantes :
 Les joueurs qui se connectent au serveur peuvent jouer une partie, soit en créant une nouvelle partie de 2 à 4 joueurs, soit en rejoignant une partie déjà créée et pour laquelle les joueurs sont en attente de participants.
 Une fois que tous les joueurs sont présents, la partie est démarrée.
 La partie doit être jouée selon les règles du jeu correspondant, jusqu'à la victoire ou la défaite des joueurs.
-Durant la partie, il n'y a pas de mécanisme de communication entre joueurs autre que ceux proposés par le jeu (cartes de couleurs pour Yokai, indications pré-définies pour The Game).
+Durant la partie, il n'y a pas de mécanisme de communication entre joueurs autre que ceux proposés par le jeu (indications pré-définies pour The Game).
 Un joueur peut quitter une partie à tout moment, mais cela sonne la fin de la partie pour tous les joueurs (jeu coopératif oblige - on gagne ensemble/on perd ensemble).
 Vous pouvez bien évidemment reprendre des illustrations sur internet pour les faces des cartes, (ou, par exemple, remplacer les familles de Yokai par des entités de votre choix au nombre de 4 comme les maisons de Pourdlard, les membres des Beatles, les 4 éléments, les 4 saisons, les 4 cavaliers de l'apocalypse, vos 4 profs préférés, etc.).
 

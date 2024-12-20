@@ -5,7 +5,9 @@ Yokai : un jeu coopératif dans lequel les joueurs doivent, avec des moyens de c
 The Game : un jeu coopératif dans lequel les joueurs doivent empiler toutes les cartes numérotées en les répartissant sur 4 tas pour lesquels un ordre croissant ou décroissant d'empilement est exigé.
 
 Je me suis tourné sur le jeu The Game
+
 Vidéo explicative: https://youtu.be/JmyCPwJKMr4 
+
 Règle : http://jeuxstrategie1.free.fr/jeu_the_game/regle.pdf
 
 Projet à réalisé :

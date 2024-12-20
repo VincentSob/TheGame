@@ -32,15 +32,20 @@ La liste des diversifiers est donnée ci-dessous, avec le niveau de difficulté 
 
 "Ça va être tout noir" ★★☆☆ 
 Ajoutez un mode sombre au jeu, sur lequel on peut basculer via une combinaison de touches.
+
 Boogie-woogie ★★☆☆
 Ajoutez des animations CSS pour donner un peu de vie au sein de l'application (menus, changement d'écrans, retournement des cartes, etc.)
+
 Qui me parle ? ★★☆☆ 
 Lorsque celle-ci est disponible sur le navigateur, utilisez la synthèse vocale pour donner des informations à l'utilisateur (par exemple pour lui indiquer que c'est à son tour de jouer, décrire l'action réalisée par le joueur actuel, etc.)
 Points bonus si le système insulte l'utilisateur parce qu'il est mauvais ou ne joue pas assez vite.
+
 "Vous voulez un whisky ?" ★★★☆
 Faire une version jouable sur mobile/tablette (design responsive, touch events).
+
 Dieu du CSS ★★★☆
 Réalisez les visuels du jeu (dos de cartes, motifs) uniquement avec du CSS.
+
 Sans les mains ★★★★ 
 La démo est réalisée entièrement à l'aide d'un script Selenium.
 Tout diversifier entamé mais non finalisé ne sera pas retenu pour la notation.
